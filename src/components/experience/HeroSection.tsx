@@ -46,7 +46,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
         {/* 4 Core Hero Telemetry Counters */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 max-w-3xl mx-auto pt-4 sm:pt-6 text-left">
-          <div className="border border-white/[0.08] bg-[#0F1117] p-3 sm:p-4">
+          <div className="relative border border-white/[0.08] bg-[#0F1117] p-3.5 sm:p-4 hover:border-white/20 transition-colors">
             <span className="text-[8px] sm:text-[9px] font-mono text-museum-muted uppercase tracking-widest block">
               UNIFIED RECEIPTS
             </span>
@@ -56,7 +56,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <p className="text-[9px] sm:text-[10px] font-serif italic text-museum-muted mt-0.5">100% normalized</p>
           </div>
 
-          <div className="border border-white/[0.08] bg-[#0F1117] p-3 sm:p-4">
+          <div className="relative border border-white/[0.08] bg-[#0F1117] p-3.5 sm:p-4 hover:border-archival-amber/40 transition-colors">
             <span className="text-[8px] sm:text-[9px] font-mono text-museum-muted uppercase tracking-widest block">
               SOURCE DATASETS
             </span>
@@ -66,7 +66,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <p className="text-[9px] sm:text-[10px] font-serif italic text-museum-muted mt-0.5">Audio, Micro, Macro</p>
           </div>
 
-          <div className="border border-white/[0.08] bg-[#0F1117] p-3 sm:p-4">
+          <div className="relative border border-white/[0.08] bg-[#0F1117] p-3.5 sm:p-4 hover:border-white/20 transition-colors">
             <span className="text-[8px] sm:text-[9px] font-mono text-museum-muted uppercase tracking-widest block">
               CROSS-DATASET SYNCS
             </span>
@@ -76,7 +76,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <p className="text-[9px] sm:text-[10px] font-serif italic text-museum-muted mt-0.5">Temporal & transit</p>
           </div>
 
-          <div className="border border-white/[0.08] bg-[#0F1117] p-3 sm:p-4">
+          <div className="relative border border-white/[0.08] bg-[#0F1117] p-3.5 sm:p-4 hover:border-archival-amber/40 transition-colors">
             <span className="text-[8px] sm:text-[9px] font-mono text-museum-muted uppercase tracking-widest block">
               DISCOVERED PATTERNS
             </span>

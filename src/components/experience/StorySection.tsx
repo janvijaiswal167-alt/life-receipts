@@ -40,7 +40,7 @@ export const StorySection: React.FC<StorySectionProps> = ({
           {onOpenStoryMode && (
             <button
               onClick={onOpenStoryMode}
-              className="inline-flex items-center space-x-2 border border-archival-amber bg-archival-amber px-5 py-2.5 text-xs font-mono font-bold text-[#08090C] uppercase hover:bg-archival-amber-bright transition-all shadow-glow-amber-subtle cursor-pointer"
+              className="btn-museum-primary"
             >
               <Sparkles className="h-4 w-4" />
               <span>REVEAL MY STORY</span>
@@ -49,9 +49,9 @@ export const StorySection: React.FC<StorySectionProps> = ({
 
           <button
             onClick={handlePrint}
-            className="inline-flex items-center space-x-2 border border-white/20 bg-[#0F1117] px-4 py-2.5 text-xs font-mono text-museum-text uppercase hover:border-white/40 hover:text-white transition-all cursor-pointer"
+            className="btn-museum-secondary"
           >
-            <Printer className="h-4 w-4" />
+            <Printer className="h-4 w-4 text-archival-amber" />
             <span>PRINT RECEIPT</span>
           </button>
         </div>

@@ -6,7 +6,7 @@ import { ReceiptSortBar, ViewMode } from '../components/explorer/ReceiptSortBar'
 import { MuseumReceiptCard } from '../components/museum/MuseumReceiptCard';
 import { ThermalReceiptMiniCard } from '../components/museum/ThermalReceiptMiniCard';
 import { ArchivalReceiptTable } from '../components/museum/ArchivalReceiptTable';
-import { Filter, X, Search, Sparkles, SlidersHorizontal, Eye } from 'lucide-react';
+import { Filter, X, Search, Sparkles, SlidersHorizontal, Eye, RotateCcw } from 'lucide-react';
 
 interface TimelinePageProps {
   receipts: LifeReceipt[];
@@ -163,21 +163,29 @@ export const TimelinePage: React.FC<TimelinePageProps> = ({
 
           {/* Empty Query State */}
           {paginatedReceipts.length === 0 ? (
-            <div className="border border-white/[0.08] bg-[#0F1117] p-12 text-center space-y-3 font-mono">
-              <span className="text-3xl text-museum-faint block">∅</span>
-              <h3 className="text-base font-bold text-white">NO ARTIFACTS MATCH THIS QUERY</h3>
-              <p className="text-xs font-serif italic text-museum-muted max-w-md mx-auto">
+            <div className="relative border border-white/[0.08] bg-[#0F1117] p-10 sm:p-14 text-center space-y-3 font-mono">
+              <span className="absolute top-2 left-2 text-[8px] text-white/20 select-none">+</span>
+              <span className="absolute top-2 right-2 text-[8px] text-white/20 select-none">+</span>
+              <span className="absolute bottom-2 left-2 text-[8px] text-white/20 select-none">+</span>
+              <span className="absolute bottom-2 right-2 text-[8px] text-white/20 select-none">+</span>
+
+              <span className="text-4xl text-museum-faint block">∅</span>
+              <h3 className="text-base font-bold text-white tracking-wide uppercase">NO ARTIFACTS MATCH THIS QUERY</h3>
+              <p className="text-xs font-serif italic text-museum-muted max-w-md mx-auto leading-relaxed">
                 No life receipts match the current combination of sources, categories, date ranges, or search terms.
               </p>
-              <button
-                onClick={() => {
-                  onResetFilters();
-                  setCurrentPage(1);
-                }}
-                className="mt-3 inline-flex items-center space-x-1.5 border border-archival-amber/60 bg-archival-amber/15 px-4 py-2 text-xs font-mono text-archival-amber hover:bg-archival-amber/25 transition-colors"
-              >
-                <span>Clear All Active Filters</span>
-              </button>
+              <div className="pt-2">
+                <button
+                  onClick={() => {
+                    onResetFilters();
+                    setCurrentPage(1);
+                  }}
+                  className="btn-museum-primary"
+                >
+                  <RotateCcw className="h-3.5 w-3.5 mr-1" />
+                  <span>Clear All Active Filters</span>
+                </button>
+              </div>
             </div>
           ) : (
             <>

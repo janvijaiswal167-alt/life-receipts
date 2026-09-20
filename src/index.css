@@ -177,14 +177,14 @@
 
 /* Custom Scrollbars & Mobile Utilities */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: #08090C;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #2A303F;
+  background: #232732;
   border-radius: 2px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
@@ -203,5 +203,84 @@
 .touch-target {
   min-height: 44px;
   min-width: 44px;
+}
+
+/* Museum Design System Component Classes */
+.btn-museum-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #D4A373;
+  color: #08090C;
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid #D4A373;
+  padding: 0.625rem 1.25rem;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+.btn-museum-primary:hover {
+  background-color: #E5B584;
+  border-color: #E5B584;
+  box-shadow: 0 0 15px rgba(212, 163, 115, 0.25);
+}
+.btn-museum-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-museum-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #12151E;
+  color: #FAF8F5;
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 0.625rem 1.25rem;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+.btn-museum-secondary:hover {
+  background-color: #181C28;
+  border-color: rgba(212, 163, 115, 0.4);
+  color: #D4A373;
+}
+.btn-museum-secondary:active {
+  transform: scale(0.98);
+}
+
+/* Museum Loading Skeleton */
+@keyframes museumPulse {
+  0%, 100% {
+    opacity: 0.4;
+    background-color: #12151E;
+  }
+  50% {
+    opacity: 0.8;
+    background-color: #1A1F2C;
+  }
+}
+
+.skeleton-box {
+  animation: museumPulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* Museum Empty State Frame */
+.museum-empty-state {
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  background-color: #0F1117;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  position: relative;
 }
 
