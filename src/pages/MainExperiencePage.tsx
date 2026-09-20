@@ -100,12 +100,15 @@ export const MainExperiencePage: React.FC<MainExperiencePageProps> = ({
 
       {/* 6. CHAPTERS */}
       <ChaptersSection
+        receipts={receipts}
         chapters={storyChapters}
+        onSelectReceipt={onSelectReceipt}
         onSelectStoryView={chap => scrollToSection('story')}
       />
 
       {/* 7. YOU MIGHT HAVE MISSED THIS */}
       <MissedThisSection
+        receipts={receipts}
         anomalies={anomalies}
         onSelectReceipt={onSelectReceipt}
       />

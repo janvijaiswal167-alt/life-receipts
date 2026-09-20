@@ -7,6 +7,8 @@ import { runLifeGraphEngineTests } from './src/engine/lifeGraphEngine.test.ts';
 import { runMomentsEngineTests } from './src/engine/momentsEngine.test.ts';
 import { runPatternEngineTests } from './src/engine/patternEngine.test.ts';
 import { runComparisonEngineTests } from './src/engine/comparisonEngine.test.ts';
+import { runChaptersEngineTests } from './src/engine/chaptersEngine.test.ts';
+import { runDiscoveriesEngineTests } from './src/engine/discoveriesEngine.test.ts';
 
 console.log('----------------------------------------------------');
 console.log('1. RUNNING GRAPH ENGINE TESTS');
@@ -28,8 +30,30 @@ console.log('4. RUNNING COMPARISON ENGINE TESTS');
 console.log('----------------------------------------------------');
 const comparisonResult = runComparisonEngineTests();
 
-const totalPassed = graphResult.passed + momentsResult.passed + patternResult.passed + comparisonResult.passed;
-const totalFailed = graphResult.failed + momentsResult.failed + patternResult.failed + comparisonResult.failed;
+console.log('\n----------------------------------------------------');
+console.log('5. RUNNING CHAPTERS ENGINE TESTS');
+console.log('----------------------------------------------------');
+const chaptersResult = runChaptersEngineTests();
+
+console.log('\n----------------------------------------------------');
+console.log('6. RUNNING DISCOVERIES ENGINE TESTS');
+console.log('----------------------------------------------------');
+const discoveriesResult = runDiscoveriesEngineTests();
+
+const totalPassed =
+  graphResult.passed +
+  momentsResult.passed +
+  patternResult.passed +
+  comparisonResult.passed +
+  chaptersResult.passed +
+  discoveriesResult.passed;
+const totalFailed =
+  graphResult.failed +
+  momentsResult.failed +
+  patternResult.failed +
+  comparisonResult.failed +
+  chaptersResult.failed +
+  discoveriesResult.failed;
 
 console.log('\n====================================================');
 console.log(`OVERALL SUITE RESULTS: ${totalPassed} PASSED, ${totalFailed} FAILED`);
