@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { LifeChapter } from '../../types/chapters';
 import { LifeReceipt } from '../../types/receipt';
+import { LifePattern } from '../../types/patterns';
 import { MuseumReceiptCard } from '../museum/MuseumReceiptCard';
 import {
   X,
@@ -13,22 +14,41 @@ import {
   Receipt,
   CheckCircle2,
   TrendingUp,
+  Zap,
+  ArrowUpRight,
 } from 'lucide-react';
 
 interface ChapterDetailModalProps {
   chapter: LifeChapter | null;
   onClose: () => void;
   onSelectReceipt: (r: LifeReceipt) => void;
+  allPatterns?: LifePattern[];
+  onSelectPattern?: (p: LifePattern) => void;
+  onSelectMoment?: (m: any) => void;
 }
 
-type ChapterTab = 'activity' | 'moments' | 'connections' | 'evidence';
+type ChapterTab = 'activity' | 'evidence' | 'moments' | 'patterns' | 'connections';
 
 export const ChapterDetailModal: React.FC<ChapterDetailModalProps> = ({
   chapter,
   onClose,
   onSelectReceipt,
+  allPatterns = [],
+  onSelectPattern,
+  onSelectMoment,
 }) => {
   const [activeTab, setActiveTab] = useState<ChapterTab>('activity');
+
+  // Filter patterns matching this chapter's era or dominant categories
+  const chapterPatterns = useMemo(() => {
+    if (!chapter) return [];
+    return allPatterns.filter(p => {
+      if (p.era && (p.era.includes(String(chapter.dateRange.yearStart)) || p.era.includes(String(chapter.dateRange.yearEnd)))) {
+        return true;
+      }
+      return chapter.dominantCategories.includes(p.category as any);
+    });
+  }, [chapter, allPatterns]);
 
   if (!chapter) return null;
 
@@ -123,6 +143,18 @@ export const ChapterDetailModal: React.FC<ChapterDetailModalProps> = ({
             </button>
 
             <button
+              onClick={() => setActiveTab('patterns')}
+              className={`px-3 py-1.5 text-xs font-mono rounded transition-all flex items-center space-x-1.5 ${
+                activeTab === 'patterns'
+                  ? 'bg-archival-amber text-black font-bold'
+                  : 'bg-[#12151E] text-museum-muted border border-white/[0.08] hover:text-white'
+              }`}
+            >
+              <Zap className="h-3.5 w-3.5" />
+              <span>4. Patterns ({chapterPatterns.length})</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('connections')}
               className={`px-3 py-1.5 text-xs font-mono rounded transition-all flex items-center space-x-1.5 ${
                 activeTab === 'connections'
@@ -131,7 +163,7 @@ export const ChapterDetailModal: React.FC<ChapterDetailModalProps> = ({
               }`}
             >
               <Link2 className="h-3.5 w-3.5" />
-              <span>4. Connections ({chapter.importantConnections.length})</span>
+              <span>5. Connections ({chapter.importantConnections.length})</span>
             </button>
           </div>
 
@@ -256,7 +288,46 @@ export const ChapterDetailModal: React.FC<ChapterDetailModalProps> = ({
             </div>
           )}
 
-          {/* TAB 4: IMPORTANT CONNECTIONS */}
+          {/* TAB 4: DOMINANT PATTERNS IN THIS ERA */}
+          {activeTab === 'patterns' && (
+            <div className="space-y-3 animate-fadeIn">
+              {chapterPatterns.length === 0 ? (
+                <p className="text-xs font-mono text-museum-muted italic">No isolated behavioral archetypes categorized for this slice.</p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {chapterPatterns.map((p) => (
+                    <div
+                      key={p.id}
+                      onClick={() => onSelectPattern?.(p)}
+                      className="p-4 bg-[#141722] border border-white/10 hover:border-archival-amber rounded-lg space-y-2 cursor-pointer transition-colors font-mono group"
+                    >
+                      <div className="flex justify-between items-center text-[10px]">
+                        <span className="px-2 py-0.5 rounded bg-archival-amber/15 text-archival-amber font-semibold uppercase">
+                          {p.patternType.replace(/_/g, ' ')}
+                        </span>
+                        <span className="text-emerald-400 font-bold">{p.confidence}</span>
+                      </div>
+                      <h4 className="text-sm font-bold text-white font-serif group-hover:text-archival-amber transition-colors">
+                        {p.title}
+                      </h4>
+                      <p className="text-xs font-serif italic text-museum-muted line-clamp-2">
+                        {p.summary}
+                      </p>
+                      <div className="pt-2 border-t border-white/[0.04] flex items-center justify-between text-[10px]">
+                        <span className="text-white font-bold">{p.stats.count} occurrences</span>
+                        <span className="text-archival-amber flex items-center">
+                          <span>Inspect Pattern</span>
+                          <ArrowUpRight className="h-3 w-3 ml-0.5" />
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 5: IMPORTANT CONNECTIONS */}
           {activeTab === 'connections' && (
             <div className="space-y-3 animate-fadeIn">
               {chapter.importantConnections.length === 0 ? (

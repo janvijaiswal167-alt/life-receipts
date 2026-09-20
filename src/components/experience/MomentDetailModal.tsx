@@ -1,6 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { LifeMoment } from '../../types/moments';
 import { LifeReceipt } from '../../types/receipt';
+import { CrossConnection } from '../../engine/patternEngine';
+import { LifePattern } from '../../types/patterns';
+import { LifeChapter } from '../../types/chapters';
+import { findLinksForMoment } from '../../engine/crossIntegration';
 import { ArchivalReceipt } from '../museum/ArchivalReceipt';
 import {
   X,
@@ -13,19 +17,35 @@ import {
   Layers,
   ArrowUpRight,
   ShieldCheck,
+  BookOpen,
 } from 'lucide-react';
 
 interface MomentDetailModalProps {
   moment: LifeMoment | null;
   onClose: () => void;
   onSelectReceipt: (r: LifeReceipt) => void;
+  allConnections?: CrossConnection[];
+  allPatterns?: LifePattern[];
+  allChapters?: LifeChapter[];
+  onSelectConnection?: (c: CrossConnection) => void;
+  onSelectPattern?: (p: LifePattern) => void;
+  onSelectChapter?: (ch: LifeChapter) => void;
 }
 
 export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
   moment,
   onClose,
   onSelectReceipt,
+  allConnections = [],
+  allPatterns = [],
+  allChapters = [],
+  onSelectConnection,
+  onSelectPattern,
+  onSelectChapter,
 }) => {
+  const links = useMemo(() => {
+    return findLinksForMoment(moment, allConnections, allPatterns, allChapters);
+  }, [moment, allConnections, allPatterns, allChapters]);
   if (!moment) return null;
 
   return (
@@ -202,6 +222,102 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
             ))}
           </div>
         </div>
+
+        {/* Section 5: Connected Cross-Dataset Links & Discovered Patterns */}
+        {(links.connections.length > 0 || links.patterns.length > 0 || links.chapter) && (
+          <div className="border border-white/10 bg-[#0F1117] p-5 space-y-4">
+            <div className="flex items-center space-x-2 text-[10px] text-archival-amber uppercase tracking-widest font-bold">
+              <GitMerge className="h-3.5 w-3.5 text-archival-amber" />
+              <span>CONNECTED RELATIONAL GRAPH & PATTERNS</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Connections in this Moment */}
+              {links.connections.length > 0 && (
+                <div className="space-y-2">
+                  <span className="text-[9px] uppercase tracking-widest text-museum-muted flex items-center space-x-1.5">
+                    <GitMerge className="h-3 w-3 text-emerald-400" />
+                    <span>CROSS-DATASET SYNCS ({links.connections.length})</span>
+                  </span>
+                  <div className="space-y-2">
+                    {links.connections.map(c => (
+                      <div
+                        key={c.id}
+                        onClick={() => onSelectConnection?.(c)}
+                        className="p-2.5 bg-[#151821] border border-white/5 hover:border-emerald-500/50 transition-all cursor-pointer group space-y-1"
+                      >
+                        <div className="flex justify-between text-[9px]">
+                          <span className="text-emerald-400 font-bold uppercase">{c.category}</span>
+                          <span className="text-museum-muted">{c.era}</span>
+                        </div>
+                        <h5 className="text-xs font-bold text-white group-hover:text-emerald-400 transition-colors line-clamp-1">
+                          {c.title}
+                        </h5>
+                        <p className="text-[10px] text-museum-muted font-serif italic line-clamp-1">
+                          {c.tagline}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Related Patterns */}
+              {links.patterns.length > 0 && (
+                <div className="space-y-2">
+                  <span className="text-[9px] uppercase tracking-widest text-museum-muted flex items-center space-x-1.5">
+                    <Sparkles className="h-3 w-3 text-cyan-400" />
+                    <span>ASSOCIATED PATTERNS ({links.patterns.length})</span>
+                  </span>
+                  <div className="space-y-2">
+                    {links.patterns.map(p => (
+                      <div
+                        key={p.id}
+                        onClick={() => onSelectPattern?.(p)}
+                        className="p-2.5 bg-[#151821] border border-white/5 hover:border-cyan-500/50 transition-all cursor-pointer group space-y-1"
+                      >
+                        <div className="flex justify-between text-[9px]">
+                          <span className="text-cyan-400 font-bold uppercase">{p.patternType.replace(/_/g, ' ')}</span>
+                          <span className="text-museum-muted">{p.confidence}</span>
+                        </div>
+                        <h5 className="text-xs font-bold text-white group-hover:text-cyan-400 transition-colors line-clamp-1">
+                          {p.title}
+                        </h5>
+                        <p className="text-[10px] text-museum-muted font-serif italic line-clamp-1">
+                          {p.summary}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Chapter Link */}
+            {links.chapter && (
+              <div
+                onClick={() => onSelectChapter?.(links.chapter!)}
+                className="mt-2 border border-archival-amber/30 bg-[#151821] p-3 flex items-center justify-between hover:border-archival-amber transition-all cursor-pointer group"
+              >
+                <div className="flex items-center space-x-2.5">
+                  <BookOpen className="h-4 w-4 text-archival-amber flex-shrink-0" />
+                  <div>
+                    <span className="text-[9px] text-museum-muted uppercase tracking-widest block">
+                      ERA PROVENANCE // CHAPTER 0{links.chapter.number}
+                    </span>
+                    <span className="text-xs font-bold text-white group-hover:text-archival-amber transition-colors">
+                      {links.chapter.title} ({links.chapter.dateRange.formatted})
+                    </span>
+                  </div>
+                </div>
+                <span className="text-[10px] text-archival-amber flex items-center flex-shrink-0">
+                  <span>View Chapter</span>
+                  <ArrowUpRight className="h-3 w-3 ml-0.5" />
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Footer */}
         <div className="pt-4 border-t border-white/10 flex justify-end">

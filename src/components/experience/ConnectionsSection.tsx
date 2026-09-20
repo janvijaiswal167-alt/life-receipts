@@ -1,20 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { CrossConnection } from '../../engine/patternEngine';
 import { LifeReceipt } from '../../types/receipt';
+import { LifeMoment } from '../../types/moments';
+import { LifePattern } from '../../types/patterns';
 import { ArchivalReceipt } from '../museum/ArchivalReceipt';
-import { GitMerge, ArrowLeftRight, Sparkles, CheckCircle2, ShieldCheck, Zap } from 'lucide-react';
+import {
+  GitMerge,
+  ArrowLeftRight,
+  Sparkles,
+  CheckCircle2,
+  ShieldCheck,
+  Zap,
+  Layers,
+  ArrowUpRight,
+} from 'lucide-react';
 
 interface ConnectionsSectionProps {
   connections: CrossConnection[];
   onSelectReceipt: (r: LifeReceipt) => void;
+  allMoments?: LifeMoment[];
+  allPatterns?: LifePattern[];
+  onSelectMoment?: (m: LifeMoment) => void;
+  onSelectPattern?: (p: LifePattern) => void;
 }
 
 export const ConnectionsSection: React.FC<ConnectionsSectionProps> = ({
   connections,
   onSelectReceipt,
+  allMoments = [],
+  allPatterns = [],
+  onSelectMoment,
+  onSelectPattern,
 }) => {
   const [activeConnectionId, setActiveConnectionId] = useState<string>(connections[0]?.id || '');
   const activeConn = connections.find(c => c.id === activeConnectionId) || connections[0];
+
+  // Find linked moment and pattern for the active connection
+  const linkedMoment = useMemo(() => {
+    if (!activeConn) return null;
+    return allMoments.find(m =>
+      m.receipts.some(r => r.id === activeConn.receiptA.id || r.id === activeConn.receiptB.id)
+    );
+  }, [activeConn, allMoments]);
+
+  const linkedPattern = useMemo(() => {
+    if (!activeConn) return null;
+    return allPatterns.find(p =>
+      p.category === activeConn.category ||
+      p.supportingReceipts.some(r => r.id === activeConn.receiptA.id || r.id === activeConn.receiptB.id)
+    );
+  }, [activeConn, allPatterns]);
 
   if (!activeConn) return null;
 
@@ -86,25 +121,48 @@ export const ConnectionsSection: React.FC<ConnectionsSectionProps> = ({
             {activeConn.insight}
           </div>
 
-          {/* Factual Observable Signals */}
-          <div className="bg-[#08090C] border border-white/[0.06] p-3 mt-4 space-y-1 text-xs font-mono">
-            <span className="text-[9px] uppercase tracking-widest text-museum-faint block mb-1">
-              OBSERVABLE DATA SIGNALS (DETERMINISTIC):
-            </span>
-            <div className="flex items-center space-x-2 text-[11px] text-museum-text">
-              <CheckCircle2 className="h-3.5 w-3.5 text-archival-amber flex-shrink-0" />
-              <span>Temporal alignment: Events synchronized within active life window ({activeConn.era})</span>
+            {/* Observable Signals */}
+            <div className="bg-[#08090C] border border-white/[0.06] p-3 mt-4 space-y-1 text-xs font-mono">
+              <span className="text-[9px] uppercase tracking-widest text-museum-faint block mb-1">
+                OBSERVABLE DATA SIGNALS (DETERMINISTIC):
+              </span>
+              <div className="flex items-center space-x-2 text-[11px] text-museum-text">
+                <CheckCircle2 className="h-3.5 w-3.5 text-archival-amber flex-shrink-0" />
+                <span>Temporal alignment: Events synchronized within active life window ({activeConn.era})</span>
+              </div>
+              <div className="flex items-center space-x-2 text-[11px] text-museum-text">
+                <CheckCircle2 className="h-3.5 w-3.5 text-archival-amber flex-shrink-0" />
+                <span>Category affinity: {activeConn.category} workflow</span>
+              </div>
             </div>
-            <div className="flex items-center space-x-2 text-[11px] text-museum-text">
-              <CheckCircle2 className="h-3.5 w-3.5 text-archival-amber flex-shrink-0" />
-              <span>Category affinity: {activeConn.category} workflow</span>
-            </div>
-            <div className="flex items-center space-x-2 text-[11px] text-museum-text">
-              <CheckCircle2 className="h-3.5 w-3.5 text-archival-amber flex-shrink-0" />
-              <span>Cross-dataset provenance: {activeConn.receiptA.source.toUpperCase()} ↔ {activeConn.receiptB.source.toUpperCase()}</span>
-            </div>
+
+            {/* Linked Parent Moment & Discovered Pattern Badges */}
+            {(linkedMoment || linkedPattern) && (
+              <div className="pt-3 border-t border-white/[0.06] flex flex-wrap items-center gap-3">
+                {linkedMoment && (
+                  <button
+                    onClick={() => onSelectMoment?.(linkedMoment)}
+                    className="inline-flex items-center space-x-2 border border-archival-amber/40 bg-[#151821] px-3 py-1.5 text-xs text-archival-amber hover:bg-archival-amber/10 hover:border-archival-amber transition-all cursor-pointer"
+                  >
+                    <Layers className="h-3.5 w-3.5" />
+                    <span>MOMENT: {linkedMoment.title}</span>
+                    <ArrowUpRight className="h-3 w-3 ml-1" />
+                  </button>
+                )}
+
+                {linkedPattern && (
+                  <button
+                    onClick={() => onSelectPattern?.(linkedPattern)}
+                    className="inline-flex items-center space-x-2 border border-cyan-500/40 bg-[#151821] px-3 py-1.5 text-xs text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-400 transition-all cursor-pointer"
+                  >
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>PATTERN: {linkedPattern.title}</span>
+                    <ArrowUpRight className="h-3 w-3 ml-1" />
+                  </button>
+                )}
+              </div>
+            )}
           </div>
-        </div>
 
         {/* Side-by-Side Paired Artifact Receipts */}
         <div className="space-y-4">

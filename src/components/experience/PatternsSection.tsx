@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { LifePattern, PatternType } from '../../types/patterns';
 import { LifeReceipt } from '../../types/receipt';
+import { LifeMoment } from '../../types/moments';
+import { LifeChapter } from '../../types/chapters';
 import { PatternCard } from './PatternCard';
 import { PatternEvidenceModal } from './PatternEvidenceModal';
 import { MuseumReceiptCard } from '../museum/MuseumReceiptCard';
@@ -26,6 +28,10 @@ interface PatternsSectionProps {
   patterns: LifePattern[];
   onSelectReceipt: (r: LifeReceipt) => void;
   onNavigateToTimeline?: () => void;
+  allMoments?: LifeMoment[];
+  allChapters?: LifeChapter[];
+  onSelectMoment?: (m: LifeMoment) => void;
+  onSelectChapter?: (ch: LifeChapter) => void;
 }
 
 type FilterCategory = 'all' | PatternType;
@@ -34,6 +40,10 @@ export const PatternsSection: React.FC<PatternsSectionProps> = ({
   patterns,
   onSelectReceipt,
   onNavigateToTimeline,
+  allMoments = [],
+  allChapters = [],
+  onSelectMoment,
+  onSelectChapter,
 }) => {
   const [selectedFilter, setSelectedFilter] = useState<FilterCategory>('all');
   const [activePatternId, setActivePatternId] = useState<string>(patterns[0]?.id || '');
@@ -265,6 +275,10 @@ export const PatternsSection: React.FC<PatternsSectionProps> = ({
         pattern={evidenceModalPattern}
         onClose={() => setEvidenceModalPattern(null)}
         onSelectReceipt={onSelectReceipt}
+        allMoments={allMoments}
+        allChapters={allChapters}
+        onSelectMoment={onSelectMoment}
+        onSelectChapter={onSelectChapter}
       />
     </section>
   );

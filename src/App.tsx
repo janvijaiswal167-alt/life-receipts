@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLifeReceipts } from './hooks/useLifeReceipts';
 import { MuseumHeader } from './components/museum/MuseumHeader';
 import { MuseumNav } from './components/museum/MuseumNav';
@@ -15,6 +15,17 @@ import { AudioSoundtrackPage } from './pages/AudioSoundtrackPage';
 import { CommerceSecurityPage } from './pages/CommerceSecurityPage';
 import { StoryCapsulePage } from './pages/StoryCapsulePage';
 import { EntityGraphPage } from './pages/EntityGraphPage';
+
+import { extractLifeMoments } from './engine/momentsEngine';
+import { discoverCrossConnections, discoverLifePatterns, CrossConnection } from './engine/patternEngine';
+import { discoverLifeChapters } from './engine/chaptersEngine';
+import { findContextualLinksForReceipt } from './engine/crossIntegration';
+import { LifeMoment } from './types/moments';
+import { LifePattern } from './types/patterns';
+import { LifeChapter } from './types/chapters';
+import { MomentDetailModal } from './components/experience/MomentDetailModal';
+import { PatternEvidenceModal } from './components/experience/PatternEvidenceModal';
+import { ChapterDetailModal } from './components/experience/ChapterDetailModal';
 
 export function App() {
   const {
@@ -37,6 +48,33 @@ export function App() {
   } = useLifeReceipts();
 
   const [isStoryModeOpen, setIsStoryModeOpen] = useState<boolean>(false);
+  const [selectedMoment, setSelectedMoment] = useState<LifeMoment | null>(null);
+  const [selectedPattern, setSelectedPattern] = useState<LifePattern | null>(null);
+  const [selectedChapter, setSelectedChapter] = useState<LifeChapter | null>(null);
+
+  // Compute unified cross-feature analytical objects from the active receipts
+  const allMoments = useMemo(() => extractLifeMoments(filteredReceipts), [filteredReceipts]);
+  const allConnections = useMemo(() => discoverCrossConnections(filteredReceipts), [filteredReceipts]);
+  const allPatterns = useMemo(() => discoverLifePatterns(filteredReceipts), [filteredReceipts]);
+  const allChapters = useMemo(() => discoverLifeChapters(filteredReceipts), [filteredReceipts]);
+
+  // Compute bidirectional contextual graph links for the currently inspected receipt
+  const receiptContextualLinks = useMemo(() => {
+    return findContextualLinksForReceipt(selectedReceipt, allMoments, allConnections, allPatterns, allChapters);
+  }, [selectedReceipt, allMoments, allConnections, allPatterns, allChapters]);
+
+  const handleSelectConnection = (c: CrossConnection) => {
+    // Find parent moment embedding this connection or open receipt
+    const linkedMoment = allMoments.find(m =>
+      m.receipts.some(r => r.id === c.receiptA.id || r.id === c.receiptB.id)
+    );
+    if (linkedMoment) {
+      setSelectedReceipt(null);
+      setSelectedMoment(linkedMoment);
+    } else {
+      setSelectedReceipt(c.receiptA);
+    }
+  };
 
   if (isLoading) {
     return <ProgressBar progress={progress} />;
@@ -69,6 +107,10 @@ export function App() {
             onNavigateTab={tab => setActiveTab(tab)}
             onOpenStoryMode={() => setIsStoryModeOpen(true)}
             onSelectYearFilter={yr => updateFilter('years', [yr])}
+            onSelectMoment={m => setSelectedMoment(m)}
+            onSelectConnection={handleSelectConnection}
+            onSelectPattern={p => setSelectedPattern(p)}
+            onSelectChapter={ch => setSelectedChapter(ch)}
           />
         )}
 
@@ -119,16 +161,103 @@ export function App() {
         )}
       </main>
 
-      {/* Archival Receipt Detail Modal */}
+      {/* Archival Receipt Detail Modal with Contextual Graph Links */}
       <Modal
         isOpen={Boolean(selectedReceipt)}
         onClose={() => setSelectedReceipt(null)}
         title="EXHIBIT ARTIFACT // PHYSICAL RECEIPT INSPECTOR"
       >
         <div className="py-2">
-          <ArchivalReceipt receipt={selectedReceipt} />
+          <ArchivalReceipt
+            receipt={selectedReceipt}
+            contextualLinks={receiptContextualLinks}
+            onSelectMoment={m => {
+              setSelectedReceipt(null);
+              setSelectedMoment(m);
+            }}
+            onSelectConnection={c => {
+              setSelectedReceipt(null);
+              handleSelectConnection(c);
+            }}
+            onSelectPattern={p => {
+              setSelectedReceipt(null);
+              setSelectedPattern(p);
+            }}
+            onSelectChapter={ch => {
+              setSelectedReceipt(null);
+              setSelectedChapter(ch);
+            }}
+          />
         </div>
       </Modal>
+
+      {/* Interactive Moment Inspection Modal */}
+      <MomentDetailModal
+        moment={selectedMoment}
+        onClose={() => setSelectedMoment(null)}
+        onSelectReceipt={r => {
+          setSelectedMoment(null);
+          setSelectedReceipt(r);
+        }}
+        allConnections={allConnections}
+        allPatterns={allPatterns}
+        allChapters={allChapters}
+        onSelectConnection={c => {
+          setSelectedMoment(null);
+          handleSelectConnection(c);
+        }}
+        onSelectPattern={p => {
+          setSelectedMoment(null);
+          setSelectedPattern(p);
+        }}
+        onSelectChapter={ch => {
+          setSelectedMoment(null);
+          setSelectedChapter(ch);
+        }}
+      />
+
+      {/* Interactive Pattern Evidence Modal */}
+      <PatternEvidenceModal
+        pattern={selectedPattern}
+        onClose={() => setSelectedPattern(null)}
+        onSelectReceipt={r => {
+          setSelectedPattern(null);
+          setSelectedReceipt(r);
+        }}
+        allMoments={allMoments}
+        allChapters={allChapters}
+        onSelectMoment={m => {
+          setSelectedPattern(null);
+          setSelectedMoment(m);
+        }}
+        onSelectChapter={ch => {
+          setSelectedPattern(null);
+          setSelectedChapter(ch);
+        }}
+        onNavigateToReceipts={() => {
+          setSelectedPattern(null);
+          setActiveTab('timeline');
+        }}
+      />
+
+      {/* Interactive Chapter Detail Modal */}
+      <ChapterDetailModal
+        chapter={selectedChapter}
+        onClose={() => setSelectedChapter(null)}
+        onSelectReceipt={r => {
+          setSelectedChapter(null);
+          setSelectedReceipt(r);
+        }}
+        allPatterns={allPatterns}
+        onSelectPattern={p => {
+          setSelectedChapter(null);
+          setSelectedPattern(p);
+        }}
+        onSelectMoment={m => {
+          setSelectedChapter(null);
+          setSelectedReceipt(m.receipt);
+        }}
+      />
 
       {/* REVEAL MY STORY — Interactive Presentation Modal */}
       <RevealStoryModal

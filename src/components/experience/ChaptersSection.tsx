@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { LifeReceipt } from '../../types/receipt';
 import { LifeChapter } from '../../types/chapters';
+import { LifePattern } from '../../types/patterns';
 import { discoverLifeChapters } from '../../engine/chaptersEngine';
 import { ChapterCard } from './ChapterCard';
 import { ChapterDetailModal } from './ChapterDetailModal';
@@ -23,6 +24,9 @@ interface ChaptersSectionProps {
   chapters?: any[];
   onSelectReceipt?: (r: LifeReceipt) => void;
   onSelectStoryView?: (chapter: any) => void;
+  allPatterns?: LifePattern[];
+  onSelectPattern?: (p: LifePattern) => void;
+  onSelectMoment?: (m: any) => void;
 }
 
 type InlineChapterTab = 'activity' | 'evidence' | 'moments' | 'connections' | 'receipts';
@@ -31,6 +35,9 @@ export const ChaptersSection: React.FC<ChaptersSectionProps> = ({
   receipts = [],
   onSelectReceipt = () => {},
   onSelectStoryView,
+  allPatterns = [],
+  onSelectPattern,
+  onSelectMoment,
 }) => {
   // Generate authentic serialized chapters from normalized receipts
   const dynamicChapters: LifeChapter[] = useMemo(() => {
@@ -336,6 +343,9 @@ export const ChaptersSection: React.FC<ChaptersSectionProps> = ({
         chapter={detailModalChapter}
         onClose={() => setDetailModalChapter(null)}
         onSelectReceipt={onSelectReceipt}
+        allPatterns={allPatterns}
+        onSelectPattern={onSelectPattern}
+        onSelectMoment={onSelectMoment}
       />
     </section>
   );

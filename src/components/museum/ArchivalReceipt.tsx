@@ -3,16 +3,37 @@ import { LifeReceipt } from '../../types/receipt';
 import { StoryReceiptChapter } from '../../engine/storyGenerator';
 import { Printer, ShieldCheck, AlertOctagon, Music, MapPin, Tag } from 'lucide-react';
 
+import { LifeMoment } from '../../types/moments';
+import { CrossConnection } from '../../engine/patternEngine';
+import { LifePattern } from '../../types/patterns';
+import { LifeChapter } from '../../types/chapters';
+import { ReceiptConnectedGraphLinks } from './ReceiptConnectedGraphLinks';
+
 interface ArchivalReceiptProps {
   receipt?: LifeReceipt | null;
   chapter?: StoryReceiptChapter | null;
   onPrint?: () => void;
+  contextualLinks?: {
+    moments: LifeMoment[];
+    connections: CrossConnection[];
+    patterns: LifePattern[];
+    chapter?: LifeChapter;
+  };
+  onSelectMoment?: (m: LifeMoment) => void;
+  onSelectConnection?: (c: CrossConnection) => void;
+  onSelectPattern?: (p: LifePattern) => void;
+  onSelectChapter?: (ch: LifeChapter) => void;
 }
 
 export const ArchivalReceipt: React.FC<ArchivalReceiptProps> = ({
   receipt,
   chapter,
   onPrint,
+  contextualLinks,
+  onSelectMoment,
+  onSelectConnection,
+  onSelectPattern,
+  onSelectChapter,
 }) => {
   const handlePrint = () => {
     if (onPrint) {
@@ -332,6 +353,18 @@ export const ArchivalReceipt: React.FC<ArchivalReceiptProps> = ({
             <span key={i} className="text-[#C8C3B4] text-[8px]">▼</span>
           ))}
         </div>
+
+        {/* Connected Life Graph Links (Moments, Connections, Patterns, Chapter) */}
+        {contextualLinks && (
+          <ReceiptConnectedGraphLinks
+            receipt={receipt}
+            contextualLinks={contextualLinks}
+            onSelectMoment={onSelectMoment}
+            onSelectConnection={onSelectConnection}
+            onSelectPattern={onSelectPattern}
+            onSelectChapter={onSelectChapter}
+          />
+        )}
       </div>
     );
   }

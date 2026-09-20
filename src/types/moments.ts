@@ -3,7 +3,7 @@
  * Defines structure for multi-receipt real-world and behavioral episodes.
  */
 
-import { LifeReceipt, ReceiptSource, CanonicalCategory } from './receipt';
+import type { LifeReceipt, ReceiptSource, CanonicalCategory } from './receipt.ts';
 
 export type MomentEpisodeType =
   | 'commute_transit'

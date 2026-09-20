@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { LifePattern } from '../../types/patterns';
 import { LifeReceipt } from '../../types/receipt';
+import { LifeMoment } from '../../types/moments';
+import { LifeChapter } from '../../types/chapters';
+import { findLinksForPattern } from '../../engine/crossIntegration';
 import { MuseumReceiptCard } from '../museum/MuseumReceiptCard';
 import {
   X,
@@ -12,12 +15,18 @@ import {
   ArrowUpRight,
   TrendingUp,
   Tag,
+  BookOpen,
+  Sparkles,
 } from 'lucide-react';
 
 interface PatternEvidenceModalProps {
   pattern: LifePattern | null;
   onClose: () => void;
   onSelectReceipt: (r: LifeReceipt) => void;
+  allMoments?: LifeMoment[];
+  allChapters?: LifeChapter[];
+  onSelectMoment?: (m: LifeMoment) => void;
+  onSelectChapter?: (ch: LifeChapter) => void;
   onNavigateToReceipts?: (tag?: string) => void;
 }
 
@@ -25,8 +34,15 @@ export const PatternEvidenceModal: React.FC<PatternEvidenceModalProps> = ({
   pattern,
   onClose,
   onSelectReceipt,
+  allMoments = [],
+  allChapters = [],
+  onSelectMoment,
+  onSelectChapter,
   onNavigateToReceipts,
 }) => {
+  const links = useMemo(() => {
+    return findLinksForPattern(pattern, allMoments, allChapters);
+  }, [pattern, allMoments, allChapters]);
   if (!pattern) return null;
 
   return (
@@ -210,6 +226,67 @@ export const PatternEvidenceModal: React.FC<PatternEvidenceModalProps> = ({
                   </span>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Connected Moments & Chapter Era */}
+          {(links.moments.length > 0 || links.chapter) && (
+            <div className="border border-white/10 bg-[#12151E] p-4 rounded-lg space-y-3 font-mono">
+              <div className="flex items-center space-x-2 text-[10px] text-archival-amber uppercase tracking-widest font-bold">
+                <Layers className="h-3.5 w-3.5" />
+                <span>CONNECTED MOMENTS & HISTORICAL ERA</span>
+              </div>
+
+              {links.moments.length > 0 && (
+                <div className="space-y-2">
+                  <span className="text-[9px] uppercase tracking-widest text-museum-muted block">
+                    EPISODES EMBEDDING THIS PATTERN ({links.moments.length})
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {links.moments.map(m => (
+                      <div
+                        key={m.id}
+                        onClick={() => onSelectMoment?.(m)}
+                        className="p-2.5 bg-[#171B26] border border-white/5 hover:border-archival-amber/50 rounded transition-all cursor-pointer group"
+                      >
+                        <div className="flex justify-between text-[9px] text-museum-muted">
+                          <span className="text-archival-amber font-bold">{m.badge}</span>
+                          <span>Score: {m.connectionScore}/100</span>
+                        </div>
+                        <h5 className="text-xs font-bold text-white group-hover:text-archival-amber transition-colors truncate mt-0.5">
+                          {m.title}
+                        </h5>
+                        <p className="text-[10px] text-museum-muted italic font-serif truncate">
+                          {m.subtitle}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {links.chapter && (
+                <div
+                  onClick={() => onSelectChapter?.(links.chapter!)}
+                  className="p-2.5 bg-[#171B26] border border-archival-amber/30 rounded flex items-center justify-between hover:border-archival-amber transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center space-x-2.5">
+                    <BookOpen className="h-4 w-4 text-archival-amber flex-shrink-0" />
+                    <div>
+                      <span className="text-[9px] text-museum-muted uppercase tracking-widest block">
+                        CHAPTER ERA 0{links.chapter.number}
+                      </span>
+                      <span className="text-xs font-bold text-white group-hover:text-archival-amber transition-colors">
+                        {links.chapter.title} ({links.chapter.dateRange.formatted})
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-archival-amber flex items-center">
+                    <span>Inspect Chapter</span>
+                    <ArrowUpRight className="h-3 w-3 ml-0.5" />
+                  </span>
+                </div>
+              )}
             </div>
           )}
         </div>

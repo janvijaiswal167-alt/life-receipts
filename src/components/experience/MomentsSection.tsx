@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { LifeMoment } from '../../types/moments';
 import { LifeReceipt } from '../../types/receipt';
+import { CrossConnection } from '../../engine/patternEngine';
+import { LifePattern } from '../../types/patterns';
+import { LifeChapter } from '../../types/chapters';
 import { MomentCard } from './MomentCard';
 import { MomentDetailModal } from './MomentDetailModal';
 import { Milestone, Sparkles } from 'lucide-react';
@@ -8,11 +11,23 @@ import { Milestone, Sparkles } from 'lucide-react';
 interface MomentsSectionProps {
   moments: LifeMoment[];
   onSelectReceipt: (r: LifeReceipt) => void;
+  allConnections?: CrossConnection[];
+  allPatterns?: LifePattern[];
+  allChapters?: LifeChapter[];
+  onSelectConnection?: (c: CrossConnection) => void;
+  onSelectPattern?: (p: LifePattern) => void;
+  onSelectChapter?: (ch: LifeChapter) => void;
 }
 
 export const MomentsSection: React.FC<MomentsSectionProps> = ({
   moments,
   onSelectReceipt,
+  allConnections = [],
+  allPatterns = [],
+  allChapters = [],
+  onSelectConnection,
+  onSelectPattern,
+  onSelectChapter,
 }) => {
   const [selectedMoment, setSelectedMoment] = useState<LifeMoment | null>(null);
 
@@ -51,6 +66,12 @@ export const MomentsSection: React.FC<MomentsSectionProps> = ({
         moment={selectedMoment}
         onClose={() => setSelectedMoment(null)}
         onSelectReceipt={onSelectReceipt}
+        allConnections={allConnections}
+        allPatterns={allPatterns}
+        allChapters={allChapters}
+        onSelectConnection={onSelectConnection}
+        onSelectPattern={onSelectPattern}
+        onSelectChapter={onSelectChapter}
       />
     </section>
   );
