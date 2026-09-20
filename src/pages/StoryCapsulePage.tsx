@@ -2,13 +2,17 @@ import React, { useState } from 'react';
 import { StoryReceiptChapter } from '../engine/storyGenerator';
 import { ArchivalReceipt } from '../components/museum/ArchivalReceipt';
 import { CuratorNote } from '../components/museum/CuratorNote';
-import { Printer, Bookmark, Check } from 'lucide-react';
+import { Printer, Bookmark, Check, Sparkles } from 'lucide-react';
 
 interface StoryCapsulePageProps {
   chapters: StoryReceiptChapter[];
+  onOpenStoryMode?: () => void;
 }
 
-export const StoryCapsulePage: React.FC<StoryCapsulePageProps> = ({ chapters }) => {
+export const StoryCapsulePage: React.FC<StoryCapsulePageProps> = ({
+  chapters,
+  onOpenStoryMode,
+}) => {
   const [activeChapterIndex, setActiveChapterIndex] = useState<number>(0);
   const activeChapter = chapters[activeChapterIndex] || chapters[0];
 
@@ -32,13 +36,25 @@ export const StoryCapsulePage: React.FC<StoryCapsulePageProps> = ({ chapters }) 
             </h2>
           </div>
 
-          <button
-            onClick={handlePrint}
-            className="inline-flex items-center space-x-2 border border-archival-amber/60 bg-archival-amber/15 px-4 py-2 text-xs font-mono font-bold text-archival-amber hover:bg-archival-amber/25 transition-all cursor-pointer shadow-glow-amber-subtle"
-          >
-            <Printer className="h-3.5 w-3.5" />
-            <span>PRINT RECEIPT ARTIFACT</span>
-          </button>
+          <div className="flex items-center space-x-3">
+            {onOpenStoryMode && (
+              <button
+                onClick={onOpenStoryMode}
+                className="inline-flex items-center space-x-2 border border-archival-amber bg-archival-amber px-4 py-2 text-xs font-mono font-bold text-[#08090C] hover:bg-archival-amber-bright transition-all cursor-pointer shadow-glow-amber-subtle"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>REVEAL MY STORY</span>
+              </button>
+            )}
+
+            <button
+              onClick={handlePrint}
+              className="inline-flex items-center space-x-2 border border-white/20 bg-[#0F1117] px-4 py-2 text-xs font-mono text-museum-text hover:border-white/40 hover:text-white transition-all cursor-pointer"
+            >
+              <Printer className="h-3.5 w-3.5" />
+              <span>PRINT RECEIPT ARTIFACT</span>
+            </button>
+          </div>
         </div>
       </div>
 

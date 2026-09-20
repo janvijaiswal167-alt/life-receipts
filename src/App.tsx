@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLifeReceipts } from './hooks/useLifeReceipts';
 import { MuseumHeader } from './components/museum/MuseumHeader';
 import { MuseumNav } from './components/museum/MuseumNav';
@@ -6,6 +6,7 @@ import { ProgressBar } from './components/ui/ProgressBar';
 import { Modal } from './components/ui/Modal';
 import { ArchivalReceipt } from './components/museum/ArchivalReceipt';
 import { Footer } from './components/layout/Footer';
+import { RevealStoryModal } from './components/story/RevealStoryModal';
 
 import { MainExperiencePage } from './pages/MainExperiencePage';
 import { TimelinePage } from './pages/TimelinePage';
@@ -19,6 +20,7 @@ export function App() {
   const {
     isLoading,
     progress,
+    store,
     filteredReceipts,
     aggregates,
     storyChapters,
@@ -33,6 +35,8 @@ export function App() {
     selectedReceipt,
     setSelectedReceipt,
   } = useLifeReceipts();
+
+  const [isStoryModeOpen, setIsStoryModeOpen] = useState<boolean>(false);
 
   if (isLoading) {
     return <ProgressBar progress={progress} />;
@@ -63,6 +67,7 @@ export function App() {
             storyChapters={storyChapters}
             onSelectReceipt={r => setSelectedReceipt(r)}
             onNavigateTab={tab => setActiveTab(tab)}
+            onOpenStoryMode={() => setIsStoryModeOpen(true)}
             onSelectYearFilter={yr => updateFilter('years', [yr])}
           />
         )}
@@ -99,7 +104,10 @@ export function App() {
         )}
 
         {activeTab === 'stories' && (
-          <StoryCapsulePage chapters={storyChapters} />
+          <StoryCapsulePage
+            chapters={storyChapters}
+            onOpenStoryMode={() => setIsStoryModeOpen(true)}
+          />
         )}
 
         {activeTab === 'graph' && (
@@ -121,6 +129,16 @@ export function App() {
           <ArchivalReceipt receipt={selectedReceipt} />
         </div>
       </Modal>
+
+      {/* REVEAL MY STORY — Interactive Presentation Modal */}
+      <RevealStoryModal
+        isOpen={isStoryModeOpen}
+        onClose={() => setIsStoryModeOpen(false)}
+        receipts={filteredReceipts}
+        store={store}
+        onSelectReceipt={r => setSelectedReceipt(r)}
+        onNavigateTab={tab => setActiveTab(tab)}
+      />
 
       {/* Museum Archival Footer */}
       <Footer

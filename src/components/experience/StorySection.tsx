@@ -7,11 +7,13 @@ import { ScrollText, Printer, CheckCircle, Sparkles } from 'lucide-react';
 interface StorySectionProps {
   decadeChapter?: StoryReceiptChapter;
   onPrintStory?: () => void;
+  onOpenStoryMode?: () => void;
 }
 
 export const StorySection: React.FC<StorySectionProps> = ({
   decadeChapter,
   onPrintStory,
+  onOpenStoryMode,
 }) => {
   const handlePrint = () => {
     if (onPrintStory) onPrintStory();
@@ -34,13 +36,25 @@ export const StorySection: React.FC<StorySectionProps> = ({
           </h2>
         </div>
 
-        <button
-          onClick={handlePrint}
-          className="inline-flex items-center space-x-2 border border-archival-amber bg-archival-amber px-5 py-2.5 text-xs font-mono font-bold text-[#08090C] uppercase hover:bg-archival-amber-bright transition-all shadow-glow-amber-subtle cursor-pointer"
-        >
-          <Printer className="h-4 w-4" />
-          <span>PRINT MASTER LIFE RECEIPT</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          {onOpenStoryMode && (
+            <button
+              onClick={onOpenStoryMode}
+              className="inline-flex items-center space-x-2 border border-archival-amber bg-archival-amber px-5 py-2.5 text-xs font-mono font-bold text-[#08090C] uppercase hover:bg-archival-amber-bright transition-all shadow-glow-amber-subtle cursor-pointer"
+            >
+              <Sparkles className="h-4 w-4" />
+              <span>REVEAL MY STORY</span>
+            </button>
+          )}
+
+          <button
+            onClick={handlePrint}
+            className="inline-flex items-center space-x-2 border border-white/20 bg-[#0F1117] px-4 py-2.5 text-xs font-mono text-museum-text uppercase hover:border-white/40 hover:text-white transition-all cursor-pointer"
+          >
+            <Printer className="h-4 w-4" />
+            <span>PRINT RECEIPT</span>
+          </button>
+        </div>
       </div>
 
       {/* Dual Layout: Curatorial Synthesis & Master Thermal Receipt */}

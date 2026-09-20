@@ -185,9 +185,9 @@ export class LifeGraphEngine {
       srcArr.push(r);
 
       // Entity Inverted Index
-      const entLen = r.entities.length;
+      const entLen = r.entities ? r.entities.length : 0;
       for (let j = 0; j < entLen; j++) {
-        const entName = r.entities[j].name.toLowerCase().trim();
+        const entName = r.entities![j].name.toLowerCase().trim();
         if (entName && entName.length > 2) {
           let idSet = this.entityIndex.get(entName);
           if (!idSet) {

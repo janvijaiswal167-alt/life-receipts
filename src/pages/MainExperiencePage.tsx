@@ -24,6 +24,7 @@ interface MainExperiencePageProps {
   storyChapters: StoryReceiptChapter[];
   onSelectReceipt: (r: LifeReceipt) => void;
   onNavigateTab: (tab: any) => void;
+  onOpenStoryMode?: () => void;
   onSelectYearFilter?: (year: number) => void;
 }
 
@@ -33,6 +34,7 @@ export const MainExperiencePage: React.FC<MainExperiencePageProps> = ({
   storyChapters,
   onSelectReceipt,
   onNavigateTab,
+  onOpenStoryMode,
   onSelectYearFilter,
 }) => {
   // Extract real patterns, connections, moments, and anomalies from authentic dataset records
@@ -60,7 +62,10 @@ export const MainExperiencePage: React.FC<MainExperiencePageProps> = ({
         datasetCount={3}
         connectionCount={connections.length * 320 + 4}
         patternCount={patterns.length + 8}
-        onRevealStory={() => scrollToSection('story')}
+        onRevealStory={() => {
+          if (onOpenStoryMode) onOpenStoryMode();
+          else scrollToSection('story');
+        }}
         onExploreReceipts={() => onNavigateTab('timeline')}
       />
 
@@ -117,6 +122,7 @@ export const MainExperiencePage: React.FC<MainExperiencePageProps> = ({
       <StorySection
         decadeChapter={decadeChapter}
         onPrintStory={() => window.print()}
+        onOpenStoryMode={onOpenStoryMode}
       />
     </div>
   );

@@ -85,9 +85,9 @@ export class LifeReceiptStore {
       srcArr.push(r);
 
       // Entity Index
-      const entLen = r.entities.length;
+      const entLen = r.entities ? r.entities.length : 0;
       for (let j = 0; j < entLen; j++) {
-        const entKey = r.entities[j].name.toLowerCase().trim();
+        const entKey = r.entities![j].name.toLowerCase().trim();
         if (entKey) {
           let idSet = this.entityIndex.get(entKey);
           if (!idSet) {

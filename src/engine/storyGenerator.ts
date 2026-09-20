@@ -3,8 +3,8 @@
  * Transforms multi-dataset insights and cross-connections into authentic, generated "Life Receipts".
  */
 
-import { LifeReceipt } from '../types/receipt';
-import { LifeReceiptStore } from '../utils/indexStore';
+import type { LifeReceipt } from '../types/receipt.ts';
+import { LifeReceiptStore } from '../utils/indexStore.ts';
 
 export interface StoryReceiptChapter {
   id: string;
