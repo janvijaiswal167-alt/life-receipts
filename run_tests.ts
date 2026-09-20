@@ -11,6 +11,7 @@ import { runChaptersEngineTests } from './src/engine/chaptersEngine.test.ts';
 import { runDiscoveriesEngineTests } from './src/engine/discoveriesEngine.test.ts';
 import { runStoryModeEngineTests } from './src/engine/storyModeEngine.test.ts';
 import { runCrossIntegrationTests } from './src/engine/crossIntegration.test.ts';
+import { runQAPassTests } from './src/engine/qaPass.test.ts';
 
 console.log('----------------------------------------------------');
 console.log('1. RUNNING GRAPH ENGINE TESTS');
@@ -52,6 +53,11 @@ console.log('8. RUNNING CROSS-FEATURE INTEGRATION TESTS');
 console.log('----------------------------------------------------');
 const crossIntegrationResult = runCrossIntegrationTests();
 
+console.log('\n----------------------------------------------------');
+console.log('9. RUNNING COMPLETE BROWSER & DATASET QA PASS TESTS');
+console.log('----------------------------------------------------');
+const qaPassResult = runQAPassTests();
+
 const totalPassed =
   graphResult.passed +
   momentsResult.passed +
@@ -60,7 +66,8 @@ const totalPassed =
   chaptersResult.passed +
   discoveriesResult.passed +
   storyModeResult.passed +
-  crossIntegrationResult.passed;
+  crossIntegrationResult.passed +
+  qaPassResult.passed;
 const totalFailed =
   graphResult.failed +
   momentsResult.failed +
@@ -69,7 +76,8 @@ const totalFailed =
   chaptersResult.failed +
   discoveriesResult.failed +
   storyModeResult.failed +
-  crossIntegrationResult.failed;
+  crossIntegrationResult.failed +
+  qaPassResult.failed;
 
 console.log('\n====================================================');
 console.log(`OVERALL SUITE RESULTS: ${totalPassed} PASSED, ${totalFailed} FAILED`);
