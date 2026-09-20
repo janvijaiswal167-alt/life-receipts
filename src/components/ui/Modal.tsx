@@ -33,7 +33,7 @@ export const Modal: React.FC<ModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-fadeIn">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/85 backdrop-blur-md transition-opacity"
@@ -42,7 +42,7 @@ export const Modal: React.FC<ModalProps> = ({
 
       {/* Modal Card */}
       <div
-        className={`relative z-10 w-full ${maxWidth} border border-white/[0.12] bg-[#0E1015] p-6 shadow-2xl transition-all my-8`}
+        className={`relative z-10 w-full max-w-[96vw] ${maxWidth} max-h-[94vh] overflow-y-auto border border-white/[0.12] bg-[#0E1015] p-4 sm:p-6 shadow-2xl transition-all my-auto`}
       >
         {/* Corner registration marks */}
         <span className="absolute top-2 left-2 text-[8px] font-mono text-white/20 select-none">+</span>
@@ -51,13 +51,14 @@ export const Modal: React.FC<ModalProps> = ({
         <span className="absolute bottom-2 right-2 text-[8px] font-mono text-white/20 select-none">+</span>
 
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/[0.08] pb-3 mb-4">
-          <h3 className="text-xs font-mono font-bold text-archival-amber tracking-widest uppercase">
+        <div className="flex items-center justify-between border-b border-white/[0.08] pb-3 mb-3 sm:mb-4">
+          <h3 className="text-[11px] sm:text-xs font-mono font-bold text-archival-amber tracking-wider sm:tracking-widest uppercase truncate pr-2">
             {title || 'EXHIBIT ARTIFACT INSPECTOR'}
           </h3>
           <button
             onClick={onClose}
-            className="p-1 text-museum-muted hover:text-white transition-colors"
+            className="p-1.5 text-museum-muted hover:text-white border border-white/10 hover:border-white/30 transition-colors flex-shrink-0 cursor-pointer"
+            aria-label="Close modal"
           >
             <X className="h-4 w-4" />
           </button>

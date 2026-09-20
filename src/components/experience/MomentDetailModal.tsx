@@ -49,30 +49,30 @@ export const MomentDetailModal: React.FC<MomentDetailModalProps> = ({
   if (!moment) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto animate-fadeIn font-mono">
-      <div className="relative max-h-[92vh] w-full max-w-4xl overflow-y-auto border border-white/20 bg-[#0A0C10] p-6 sm:p-8 shadow-2xl space-y-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-2 sm:p-4 overflow-y-auto animate-fadeIn font-mono">
+      <div className="relative max-h-[92vh] w-full max-w-[96vw] sm:max-w-4xl overflow-y-auto border border-white/20 bg-[#0A0C10] p-4 sm:p-8 shadow-2xl space-y-5 sm:space-y-6">
         {/* Top Header Bar */}
-        <div className="flex items-start justify-between border-b border-white/10 pb-4">
+        <div className="flex items-start justify-between border-b border-white/10 pb-3 sm:pb-4 gap-2">
           <div>
-            <div className="flex items-center space-x-2 text-[10px] text-archival-amber uppercase tracking-wider mb-1">
+            <div className="flex items-center space-x-2 text-[9px] sm:text-[10px] text-archival-amber uppercase tracking-wider mb-1">
               <span className="border border-archival-amber/40 bg-archival-amber/10 px-2 py-0.5 font-bold">
                 {moment.badge}
               </span>
-              <span>EPISODE INSPECTION // SCORE: {moment.connectionScore}/100</span>
+              <span className="truncate">EPISODE // SCORE: {moment.connectionScore}/100</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white leading-snug">
+            <h2 className="text-lg sm:text-2xl font-bold text-white leading-snug">
               {moment.title}
             </h2>
-            <p className="text-xs font-serif italic text-museum-muted mt-1">
+            <p className="text-xs font-serif italic text-museum-muted mt-0.5 sm:mt-1">
               {moment.subtitle}
             </p>
           </div>
 
           <button
             onClick={onClose}
-            className="border border-white/10 p-1.5 text-museum-muted hover:text-white hover:border-white/30 transition-colors"
+            className="border border-white/10 p-1.5 text-museum-muted hover:text-white hover:border-white/30 transition-colors flex-shrink-0 cursor-pointer"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 sm:h-5 w-4 sm:w-5" />
           </button>
         </div>
 

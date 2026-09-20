@@ -53,49 +53,49 @@ export const ChapterDetailModal: React.FC<ChapterDetailModalProps> = ({
   if (!chapter) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/80 backdrop-blur-sm animate-fadeIn">
       <div
-        className="relative w-full max-w-4xl max-h-[90vh] bg-[#0D0F15] border border-white/15 rounded-lg shadow-2xl flex flex-col overflow-hidden animate-scaleUp"
+        className="relative w-full max-w-[96vw] sm:max-w-4xl max-h-[92vh] bg-[#0D0F15] border border-white/15 rounded-lg shadow-2xl flex flex-col overflow-hidden animate-scaleUp"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Top Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#12151E]">
-          <div className="flex items-center space-x-3">
-            <span className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest bg-archival-amber/15 text-archival-amber border border-archival-amber/30 rounded font-semibold">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-white/10 bg-[#12151E]">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-mono uppercase tracking-wider sm:tracking-widest bg-archival-amber/15 text-archival-amber border border-archival-amber/30 rounded font-semibold">
               CHAPTER 0{chapter.number} // {chapter.badge || 'HISTORICAL REGIME'}
             </span>
-            <span className="text-xs font-mono text-museum-muted">
+            <span className="text-[10px] sm:text-xs font-mono text-museum-muted hidden xs:inline">
               {chapter.dateRange.formatted}
             </span>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 text-museum-muted hover:text-white rounded hover:bg-white/10 transition-colors"
+            className="p-1.5 text-museum-muted hover:text-white rounded hover:bg-white/10 transition-colors cursor-pointer"
             aria-label="Close modal"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 sm:h-5 w-4 sm:w-5" />
           </button>
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-5 sm:space-y-6 custom-scrollbar">
           {/* Chapter Main Title */}
           <div className="space-y-2">
-            <div className="flex items-center space-x-2 text-xs font-mono">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
               <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-archival-amber rounded">
                 {chapter.dateRange.formatted}
               </span>
-              <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-white/80 rounded">
+              <span className="px-2 py-0.5 bg-white/5 border border-white/10 text-white/80 rounded truncate max-w-full">
                 {chapter.dominantCategories.join(' • ')}
               </span>
             </div>
 
-            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-tight">
+            <h2 className="text-xl sm:text-3xl font-serif font-bold text-white tracking-tight">
               {chapter.title}
             </h2>
 
-            <p className="text-sm font-serif italic text-museum-muted leading-relaxed">
+            <p className="text-xs sm:text-sm font-serif italic text-museum-muted leading-relaxed">
               {chapter.subtitle}
             </p>
 
@@ -104,65 +104,65 @@ export const ChapterDetailModal: React.FC<ChapterDetailModalProps> = ({
             </p>
           </div>
 
-          {/* Interactive Chapter Sub-Tabs */}
-          <div className="flex items-center space-x-2 border-b border-white/10 pb-2">
+          {/* Interactive Chapter Sub-Tabs (Responsive Flex Wrap) */}
+          <div className="flex flex-wrap gap-1.5 border-b border-white/10 pb-2.5">
             <button
               onClick={() => setActiveTab('activity')}
-              className={`px-3 py-1.5 text-xs font-mono rounded transition-all flex items-center space-x-1.5 ${
+              className={`px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs font-mono rounded transition-all flex items-center space-x-1 sm:space-x-1.5 cursor-pointer ${
                 activeTab === 'activity'
                   ? 'bg-archival-amber text-black font-bold'
                   : 'bg-[#12151E] text-museum-muted border border-white/[0.08] hover:text-white'
               }`}
             >
-              <Activity className="h-3.5 w-3.5" />
+              <Activity className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
               <span>1. Activity & Metrics</span>
             </button>
 
             <button
               onClick={() => setActiveTab('evidence')}
-              className={`px-3 py-1.5 text-xs font-mono rounded transition-all flex items-center space-x-1.5 ${
+              className={`px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs font-mono rounded transition-all flex items-center space-x-1 sm:space-x-1.5 cursor-pointer ${
                 activeTab === 'evidence'
                   ? 'bg-archival-amber text-black font-bold'
                   : 'bg-[#12151E] text-museum-muted border border-white/[0.08] hover:text-white'
               }`}
             >
-              <CheckCircle2 className="h-3.5 w-3.5" />
-              <span>2. Evidence Statements ({chapter.evidenceStatements.length})</span>
+              <CheckCircle2 className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
+              <span>2. Evidence ({chapter.evidenceStatements.length})</span>
             </button>
 
             <button
               onClick={() => setActiveTab('moments')}
-              className={`px-3 py-1.5 text-xs font-mono rounded transition-all flex items-center space-x-1.5 ${
+              className={`px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs font-mono rounded transition-all flex items-center space-x-1 sm:space-x-1.5 cursor-pointer ${
                 activeTab === 'moments'
                   ? 'bg-archival-amber text-black font-bold'
                   : 'bg-[#12151E] text-museum-muted border border-white/[0.08] hover:text-white'
               }`}
             >
-              <Sparkles className="h-3.5 w-3.5" />
+              <Sparkles className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
               <span>3. Moments ({chapter.importantMoments.length})</span>
             </button>
 
             <button
               onClick={() => setActiveTab('patterns')}
-              className={`px-3 py-1.5 text-xs font-mono rounded transition-all flex items-center space-x-1.5 ${
+              className={`px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs font-mono rounded transition-all flex items-center space-x-1 sm:space-x-1.5 cursor-pointer ${
                 activeTab === 'patterns'
                   ? 'bg-archival-amber text-black font-bold'
                   : 'bg-[#12151E] text-museum-muted border border-white/[0.08] hover:text-white'
               }`}
             >
-              <Zap className="h-3.5 w-3.5" />
+              <Zap className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
               <span>4. Patterns ({chapterPatterns.length})</span>
             </button>
 
             <button
               onClick={() => setActiveTab('connections')}
-              className={`px-3 py-1.5 text-xs font-mono rounded transition-all flex items-center space-x-1.5 ${
+              className={`px-2.5 sm:px-3 py-1.5 text-[11px] sm:text-xs font-mono rounded transition-all flex items-center space-x-1 sm:space-x-1.5 cursor-pointer ${
                 activeTab === 'connections'
                   ? 'bg-archival-amber text-black font-bold'
                   : 'bg-[#12151E] text-museum-muted border border-white/[0.08] hover:text-white'
               }`}
             >
-              <Link2 className="h-3.5 w-3.5" />
+              <Link2 className="h-3 sm:h-3.5 w-3 sm:w-3.5" />
               <span>5. Connections ({chapter.importantConnections.length})</span>
             </button>
           </div>

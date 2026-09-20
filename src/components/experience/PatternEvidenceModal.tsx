@@ -46,33 +46,33 @@ export const PatternEvidenceModal: React.FC<PatternEvidenceModalProps> = ({
   if (!pattern) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-black/80 backdrop-blur-sm animate-fadeIn">
       <div
-        className="relative w-full max-w-4xl max-h-[90vh] bg-[#0D0F15] border border-white/15 rounded-lg shadow-2xl flex flex-col overflow-hidden animate-scaleUp"
+        className="relative w-full max-w-[96vw] sm:max-w-4xl max-h-[92vh] bg-[#0D0F15] border border-white/15 rounded-lg shadow-2xl flex flex-col overflow-hidden animate-scaleUp"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Top Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#12151E]">
-          <div className="flex items-center space-x-3">
-            <span className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest bg-archival-amber/15 text-archival-amber border border-archival-amber/30 rounded">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-white/10 bg-[#12151E]">
+          <div className="flex items-center space-x-2 sm:space-x-3 truncate">
+            <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-mono uppercase tracking-wider sm:tracking-widest bg-archival-amber/15 text-archival-amber border border-archival-amber/30 rounded font-semibold truncate">
               PATTERN EVIDENCE DOSSIER
             </span>
-            <span className="text-xs font-mono text-museum-muted">
+            <span className="text-[10px] sm:text-xs font-mono text-museum-muted hidden xs:inline">
               ID: {pattern.id}
             </span>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 text-museum-muted hover:text-white rounded hover:bg-white/10 transition-colors"
+            className="p-1.5 text-museum-muted hover:text-white rounded hover:bg-white/10 transition-colors flex-shrink-0 cursor-pointer"
             aria-label="Close modal"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 sm:h-5 w-4 sm:w-5" />
           </button>
         </div>
 
         {/* Modal Content Scroll Area */}
-        <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-8 custom-scrollbar">
           {/* Main Title & Core Badges */}
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2 text-xs font-mono">

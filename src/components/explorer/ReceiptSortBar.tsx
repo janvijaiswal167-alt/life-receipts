@@ -58,13 +58,13 @@ export const ReceiptSortBar: React.FC<ReceiptSortBarProps> = ({
           {onToggleMobileFilter && (
             <button
               onClick={onToggleMobileFilter}
-              className={`lg:hidden flex items-center space-x-1.5 border px-2.5 py-1 text-xs transition-colors ${
+              className={`lg:hidden flex items-center space-x-1.5 border px-3 py-2 text-xs transition-colors min-h-[40px] cursor-pointer ${
                 isMobileFilterOpen
                   ? 'border-archival-amber bg-archival-amber/20 text-archival-amber font-bold'
                   : 'border-white/10 bg-[#151821] text-museum-muted hover:text-white'
               }`}
             >
-              <Filter className="h-3.5 w-3.5" />
+              <Filter className="h-4 w-4" />
               <span>Filters</span>
             </button>
           )}
@@ -82,8 +82,8 @@ export const ReceiptSortBar: React.FC<ReceiptSortBarProps> = ({
         {/* Right Controls: Sort Select + View Mode Toggle */}
         <div className="flex items-center space-x-3 flex-wrap gap-y-2">
           {/* Sort Dropdown */}
-          <div className="flex items-center space-x-1.5 border border-white/10 bg-[#151821] px-2.5 py-1">
-            <ArrowUpDown className="h-3 w-3 text-archival-amber" />
+          <div className="flex items-center space-x-1.5 border border-white/10 bg-[#151821] px-3 py-2 min-h-[40px]">
+            <ArrowUpDown className="h-3.5 w-3.5 text-archival-amber shrink-0" />
             <select
               value={filters.sortBy || 'date_desc'}
               onChange={e => onUpdateFilter('sortBy', e.target.value as SortOption)}
@@ -101,7 +101,7 @@ export const ReceiptSortBar: React.FC<ReceiptSortBarProps> = ({
           <div className="flex items-center border border-white/10 bg-[#151821] p-0.5">
             <button
               onClick={() => onViewModeChange('grid')}
-              className={`flex items-center space-x-1 px-2 py-1 transition-colors ${
+              className={`flex items-center space-x-1 px-3 py-2 min-h-[38px] transition-colors cursor-pointer ${
                 viewMode === 'grid'
                   ? 'bg-archival-amber/20 text-archival-amber font-bold border border-archival-amber/40'
                   : 'text-museum-muted hover:text-white border border-transparent'
@@ -114,7 +114,7 @@ export const ReceiptSortBar: React.FC<ReceiptSortBarProps> = ({
 
             <button
               onClick={() => onViewModeChange('thermal')}
-              className={`flex items-center space-x-1 px-2 py-1 transition-colors ${
+              className={`flex items-center space-x-1 px-3 py-2 min-h-[38px] transition-colors cursor-pointer ${
                 viewMode === 'thermal'
                   ? 'bg-archival-amber/20 text-archival-amber font-bold border border-archival-amber/40'
                   : 'text-museum-muted hover:text-white border border-transparent'
@@ -127,7 +127,7 @@ export const ReceiptSortBar: React.FC<ReceiptSortBarProps> = ({
 
             <button
               onClick={() => onViewModeChange('table')}
-              className={`flex items-center space-x-1 px-2 py-1 transition-colors ${
+              className={`flex items-center space-x-1 px-3 py-2 min-h-[38px] transition-colors cursor-pointer ${
                 viewMode === 'table'
                   ? 'bg-archival-amber/20 text-archival-amber font-bold border border-archival-amber/40'
                   : 'text-museum-muted hover:text-white border border-transparent'

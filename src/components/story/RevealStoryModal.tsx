@@ -173,16 +173,16 @@ export const RevealStoryModal: React.FC<RevealStoryModalProps> = ({
       {/* ==================================================================== */}
       {/* 1. TOP PRESENTATION HEADER */}
       {/* ==================================================================== */}
-      <header className="relative z-20 flex items-center justify-between px-4 sm:px-8 py-4 border-b border-white/[0.08] bg-[#08090C]/90 backdrop-blur-md">
+      <header className="relative z-20 flex items-center justify-between px-3 sm:px-8 py-3 sm:py-4 border-b border-white/[0.08] bg-[#08090C]/90 backdrop-blur-md">
         {/* Left: Title & Stage Indicator */}
-        <div className="flex items-center space-x-3">
-          <div className="h-2 w-2 rounded-full bg-archival-amber animate-pulse" />
-          <span className="text-xs font-mono font-bold tracking-widest text-white uppercase">
-            STORY MODE<span className="text-archival-amber">//</span>REVEAL MY STORY
+        <div className="flex items-center space-x-2 sm:space-x-3">
+          <div className="h-2 w-2 rounded-full bg-archival-amber animate-pulse flex-shrink-0" />
+          <span className="text-[11px] sm:text-xs font-mono font-bold tracking-wider sm:tracking-widest text-white uppercase truncate">
+            STORY<span className="text-archival-amber">//</span>REVEAL
           </span>
-          <span className="hidden sm:inline-block text-museum-faint font-mono">•</span>
-          <span className="hidden sm:inline-block text-[11px] font-mono text-museum-muted">
-            STEP 0{currentStepIndex + 1} OF 0{totalSteps}
+          <span className="text-museum-faint font-mono">•</span>
+          <span className="text-[10px] sm:text-[11px] font-mono text-archival-amber font-semibold whitespace-nowrap">
+            0{currentStepIndex + 1} / 0{totalSteps}
           </span>
         </div>
 
@@ -206,14 +206,14 @@ export const RevealStoryModal: React.FC<RevealStoryModalProps> = ({
         </div>
 
         {/* Right: Quick Action Controls */}
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2 sm:space-x-3">
           {!isLastStep && (
             <button
               onClick={handleSkipToEnd}
-              className="hidden sm:inline-flex items-center space-x-1.5 border border-white/10 px-2.5 py-1 text-[10px] font-mono text-museum-muted hover:text-white hover:border-archival-amber/40 transition-all cursor-pointer"
+              className="inline-flex items-center space-x-1 border border-white/10 px-2 sm:px-2.5 py-1 text-[9px] sm:text-[10px] font-mono text-museum-muted hover:text-white hover:border-archival-amber/40 transition-all cursor-pointer"
             >
               <FastForward className="h-3 w-3" />
-              <span>SKIP TO END</span>
+              <span className="hidden xs:inline">SKIP</span>
             </button>
           )}
 
@@ -242,7 +242,7 @@ export const RevealStoryModal: React.FC<RevealStoryModalProps> = ({
       {/* ==================================================================== */}
       {/* 2. MAIN PRESENTATION STAGE (Framer Motion Slides) */}
       {/* ==================================================================== */}
-      <main className="relative z-10 flex-1 overflow-y-auto px-4 sm:px-8 py-6 sm:py-8 flex items-center justify-center">
+      <main className="relative z-10 flex-1 overflow-y-auto px-3 sm:px-8 py-4 sm:py-8 flex items-center justify-center">
         <div className="w-full max-w-5xl">
           <AnimatePresence custom={direction} mode="wait">
             <motion.div
@@ -321,27 +321,27 @@ export const RevealStoryModal: React.FC<RevealStoryModalProps> = ({
       {/* ==================================================================== */}
       {/* 3. BOTTOM INTERACTIVE CONTROL BAR */}
       {/* ==================================================================== */}
-      <footer className="relative z-20 border-t border-white/[0.08] bg-[#08090C]/95 px-4 sm:px-8 py-3.5 backdrop-blur-md">
-        <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
+      <footer className="relative z-20 border-t border-white/[0.08] bg-[#08090C]/95 px-3 sm:px-8 py-3 backdrop-blur-md">
+        <div className="max-w-5xl mx-auto flex items-center justify-between gap-2 sm:gap-3">
           {/* Left: Go Back Button */}
           <button
             onClick={handlePrev}
             disabled={isFirstStep}
-            className={`inline-flex items-center space-x-1 px-4 py-2 text-xs font-mono border transition-all cursor-pointer ${
+            className={`inline-flex items-center space-x-1 min-h-[42px] px-3 sm:px-4 py-2 text-xs font-mono border transition-all cursor-pointer ${
               isFirstStep
                 ? 'opacity-30 cursor-not-allowed border-white/10 text-museum-muted'
                 : 'border-white/20 text-museum-text hover:text-white hover:border-archival-amber'
             }`}
           >
             <ChevronLeft className="h-4 w-4" />
-            <span>BACK</span>
+            <span className="hidden xs:inline">BACK</span>
           </button>
 
           {/* Center: Inspect Evidence Action on Every Slide */}
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setIsEvidenceDrawerOpen(true)}
-              className="inline-flex items-center space-x-1.5 border border-archival-amber/40 bg-archival-amber/10 px-3.5 py-2 text-xs font-mono text-archival-amber hover:bg-archival-amber/20 hover:border-archival-amber transition-all cursor-pointer"
+              className="inline-flex items-center space-x-1 sm:space-x-1.5 min-h-[42px] border border-archival-amber/40 bg-archival-amber/10 px-2.5 sm:px-3.5 py-2 text-xs font-mono text-archival-amber hover:bg-archival-amber/20 hover:border-archival-amber transition-all cursor-pointer"
             >
               <Search className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">INSPECT EVIDENCE</span>
@@ -355,9 +355,9 @@ export const RevealStoryModal: React.FC<RevealStoryModalProps> = ({
           {/* Right: Continue / Finish Button */}
           <button
             onClick={handleNext}
-            className="inline-flex items-center space-x-1.5 border border-archival-amber bg-archival-amber px-5 py-2 text-xs font-mono font-bold text-[#08090C] hover:bg-archival-amber-bright transition-all shadow-glow-amber-subtle cursor-pointer"
+            className="inline-flex items-center space-x-1 sm:space-x-1.5 min-h-[42px] border border-archival-amber bg-archival-amber px-3.5 sm:px-5 py-2 text-xs font-mono font-bold text-[#08090C] hover:bg-archival-amber-bright transition-all shadow-glow-amber-subtle cursor-pointer"
           >
-            <span>{isLastStep ? 'EXPLORE RECEIPTS' : 'CONTINUE'}</span>
+            <span>{isLastStep ? 'EXPLORE' : 'CONTINUE'}</span>
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>

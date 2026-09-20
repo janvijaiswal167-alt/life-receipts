@@ -45,7 +45,7 @@ export const ArchivalReceipt: React.FC<ArchivalReceiptProps> = ({
 
   if (chapter) {
     return (
-      <div className="relative mx-auto w-full max-w-sm bg-[#F4F0E6] text-[#141519] font-mono p-6 sm:p-7 shadow-receipt-physical border-t border-b border-[#D6D1C4] selection:bg-amber-900/10 selection:text-black">
+      <div className="relative mx-auto w-full max-w-full sm:max-w-sm bg-[#F4F0E6] text-[#141519] font-mono p-4 sm:p-7 shadow-receipt-physical border-t border-b border-[#D6D1C4] selection:bg-amber-900/10 selection:text-black overflow-hidden break-words">
         {/* Top Perforation / Tear */}
         <div className="absolute -top-2 left-0 right-0 flex justify-between overflow-hidden opacity-60 select-none">
           {Array.from({ length: 26 }).map((_, i) => (
@@ -55,50 +55,50 @@ export const ArchivalReceipt: React.FC<ArchivalReceiptProps> = ({
 
         {/* Museum Catalog Stamp Header */}
         <div className="text-center border-b border-dashed border-[#A8A395] pb-4">
-          <div className="flex justify-between items-center text-[9px] text-receipt-faint mb-2">
+          <div className="flex justify-between items-center text-[8px] sm:text-[9px] text-receipt-faint mb-2">
             <span>MUSEUM ARCHIVE // EX-0{chapter.id.length}</span>
             <span>PROVENANCE: VERIFIED</span>
           </div>
 
-          <h2 className="text-lg font-extrabold tracking-widest uppercase">
+          <h2 className="text-base sm:text-lg font-extrabold tracking-widest uppercase">
             LIFE//RECEIPTS
           </h2>
-          <p className="text-[10px] text-receipt-faint tracking-wider mt-0.5">
+          <p className="text-[9px] sm:text-[10px] text-receipt-faint tracking-wider mt-0.5">
             TERMINAL REF: PUNE-MUMBAI • {chapter.era}
           </p>
 
-          <div className="mt-3 inline-block border border-[#141519] px-2.5 py-0.5 text-[9px] font-bold tracking-widest uppercase">
+          <div className="mt-2.5 inline-block border border-[#141519] px-2 py-0.5 text-[8px] sm:text-[9px] font-bold tracking-widest uppercase">
             {chapter.badge}
           </div>
 
-          <h3 className="mt-2 text-sm font-bold tracking-tight text-[#141519]">
+          <h3 className="mt-2 text-xs sm:text-sm font-bold tracking-tight text-[#141519]">
             {chapter.title}
           </h3>
         </div>
 
         {/* Narrative Curator Note */}
-        <div className="my-4 border-l-2 border-[#141519] pl-3 text-[11px] font-serif italic leading-relaxed text-[#33353D]">
+        <div className="my-3 sm:my-4 border-l-2 border-[#141519] pl-2.5 sm:pl-3 text-[10px] sm:text-[11px] font-serif italic leading-relaxed text-[#33353D]">
           {chapter.narrative}
         </div>
 
         {/* Itemized Table */}
         <div className="border-b border-dashed border-[#A8A395] pb-3 text-xs">
-          <div className="flex justify-between font-bold text-[9px] text-receipt-faint border-b border-[#C8C3B4] pb-1 mb-2">
+          <div className="flex justify-between font-bold text-[8px] sm:text-[9px] text-receipt-faint border-b border-[#C8C3B4] pb-1 mb-2">
             <span>RECORD / DESCRIPTION</span>
             <span>QTY / VALUE</span>
           </div>
 
           <div className="space-y-2">
             {chapter.receiptItems.map((item, idx) => (
-              <div key={idx} className="flex justify-between items-start text-[11px]">
-                <div className="pr-2">
-                  <p className="font-semibold leading-snug">{item.name}</p>
+              <div key={idx} className="flex justify-between items-start text-[10px] sm:text-[11px] gap-2">
+                <div className="pr-1 flex-1 min-w-0">
+                  <p className="font-semibold leading-snug break-words">{item.name}</p>
                   {item.detail && (
-                    <p className="text-[9px] text-receipt-faint mt-0.5">{item.detail}</p>
+                    <p className="text-[8px] sm:text-[9px] text-receipt-faint mt-0.5 break-words">{item.detail}</p>
                   )}
                 </div>
-                <div className="text-right whitespace-nowrap">
-                  {item.qty && <span className="text-[10px] text-receipt-faint mr-1.5">{item.qty}</span>}
+                <div className="text-right whitespace-nowrap flex-shrink-0">
+                  {item.qty && <span className="text-[9px] sm:text-[10px] text-receipt-faint mr-1.5">{item.qty}</span>}
                   <span className="font-bold">{item.amount}</span>
                 </div>
               </div>
@@ -107,52 +107,52 @@ export const ArchivalReceipt: React.FC<ArchivalReceiptProps> = ({
         </div>
 
         {/* Subtotal & Total Statement */}
-        <div className="py-3 text-xs space-y-1.5 border-b border-dashed border-[#A8A395]">
+        <div className="py-2.5 sm:py-3 text-xs space-y-1.5 border-b border-dashed border-[#A8A395]">
           {chapter.subtotalLabel && (
-            <div className="flex justify-between text-[#4E505A] text-[10px]">
+            <div className="flex justify-between text-[#4E505A] text-[9px] sm:text-[10px]">
               <span>{chapter.subtotalLabel}</span>
               <span className="font-semibold">{chapter.subtotalValue}</span>
             </div>
           )}
           {chapter.taxOrMoodLabel && (
-            <div className="flex justify-between text-[#4E505A] text-[10px]">
+            <div className="flex justify-between text-[#4E505A] text-[9px] sm:text-[10px]">
               <span>{chapter.taxOrMoodLabel}</span>
               <span>{chapter.taxOrMoodValue}</span>
             </div>
           )}
-          <div className="flex justify-between text-sm font-extrabold pt-1.5 text-[#141519] border-t border-[#D6D1C4]">
+          <div className="flex justify-between text-xs sm:text-sm font-extrabold pt-1.5 text-[#141519] border-t border-[#D6D1C4]">
             <span>{chapter.totalLabel}</span>
             <span className="underline decoration-double font-mono">{chapter.totalValue}</span>
           </div>
         </div>
 
         {/* Official Rubber Stamp & Barcode */}
-        <div className="pt-4 text-center space-y-3">
+        <div className="pt-3 sm:pt-4 text-center space-y-2.5 sm:space-y-3">
           <div className="flex justify-center">
-            <span className="rubber-stamp">
+            <span className="rubber-stamp text-[8px] sm:text-[9px]">
               ARCHIVED BY LIFE//RECEIPTS
             </span>
           </div>
 
-          <div className="font-mono text-base font-bold tracking-[0.25em] text-[#22242B] select-none">
+          <div className="font-mono text-sm sm:text-base font-bold tracking-[0.2em] sm:tracking-[0.25em] text-[#22242B] select-none truncate">
             {chapter.barcode}
           </div>
 
-          <p className="text-[9px] text-receipt-faint leading-tight">
+          <p className="text-[8px] sm:text-[9px] text-receipt-faint leading-tight">
             {chapter.footnote}
           </p>
 
-          <div className="pt-2 flex justify-center">
+          <div className="pt-1.5 flex justify-center">
             <button
               onClick={handlePrint}
-              className="flex items-center space-x-1.5 border border-[#141519] px-3 py-1 text-[10px] uppercase font-bold text-[#141519] hover:bg-black/5 transition-colors"
+              className="flex items-center space-x-1.5 border border-[#141519] px-3 py-1.5 text-[9px] sm:text-[10px] uppercase font-bold text-[#141519] hover:bg-black/5 transition-colors cursor-pointer"
             >
               <Printer className="h-3 w-3" />
               <span>Print Thermal Copy</span>
             </button>
           </div>
 
-          <p className="text-[8px] text-[#8C8E96] uppercase tracking-widest pt-1">
+          <p className="text-[7px] sm:text-[8px] text-[#8C8E96] uppercase tracking-widest pt-1">
             EXHIBITION ARTIFACT • NOT A LEGAL TAX INVOICE
           </p>
         </div>
@@ -176,7 +176,7 @@ export const ArchivalReceipt: React.FC<ArchivalReceiptProps> = ({
     }[receipt.source];
 
     return (
-      <div className="relative mx-auto w-full max-w-sm bg-[#F4F0E6] text-[#141519] font-mono p-6 sm:p-7 shadow-receipt-physical border-t border-b border-[#D6D1C4]">
+      <div className="relative mx-auto w-full max-w-full sm:max-w-sm bg-[#F4F0E6] text-[#141519] font-mono p-4 sm:p-7 shadow-receipt-physical border-t border-b border-[#D6D1C4] overflow-hidden break-words">
         {/* Top Perforation */}
         <div className="absolute -top-2 left-0 right-0 flex justify-between overflow-hidden opacity-60 select-none">
           {Array.from({ length: 26 }).map((_, i) => (

@@ -309,113 +309,270 @@ export const EntityGraphPage: React.FC<EntityGraphPageProps> = ({
     setSelectedNodeId(null);
   }, []);
 
+  const [viewMode, setViewMode] = useState<'canvas' | 'list'>('canvas');
+
+  // Filtered connections list for mobile-friendly view
+  const filteredConnectionsList = useMemo(() => {
+    return connections.filter(c => {
+      if (showStrongestOnly && c.score < 70) return false;
+      if (sourceFilter === 'cross' && !c.crossDataset) return false;
+      if (sourceFilter === 'spotify' && c.sourceReceipt.source !== 'spotify' && c.targetReceipt.source !== 'spotify') return false;
+      if (sourceFilter === 'household' && c.sourceReceipt.source !== 'household' && c.targetReceipt.source !== 'household') return false;
+      if (sourceFilter === 'commerce' && c.sourceReceipt.source !== 'commerce' && c.targetReceipt.source !== 'commerce') return false;
+      return true;
+    });
+  }, [connections, showStrongestOnly, sourceFilter]);
+
   return (
-    <div className="space-y-8 animate-fadeIn font-mono">
+    <div className="space-y-6 sm:space-y-8 animate-fadeIn font-mono">
       {/* Editorial Header */}
-      <div className="border-b border-white/[0.08] pb-6">
-        <span className="text-[10px] font-mono tracking-widest text-archival-amber uppercase">
-          EXHIBIT 06 // TOPOLOGY GRAPH & INTERACTIVE CONNECTIONS VISUALIZATION
-        </span>
-        <h2 className="mt-2 text-3xl font-serif text-[#FAF8F5]">
-          The Relational Web of Living
-        </h2>
-        <p className="mt-1 text-xs font-serif italic text-museum-muted">
-          Interactive graph mapping the explainable bridges between audio playback, daily household routines, and digital commerce.
-        </p>
+      <div className="border-b border-white/[0.08] pb-5 sm:pb-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span className="text-[10px] font-mono tracking-widest text-archival-amber uppercase">
+              EXHIBIT 06 // TOPOLOGY GRAPH & INTERACTIVE CONNECTIONS
+            </span>
+            <h2 className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-serif text-[#FAF8F5]">
+              The Relational Web of Living
+            </h2>
+            <p className="mt-1 text-xs font-serif italic text-museum-muted">
+              Interactive graph mapping the explainable bridges between audio playback, daily household routines, and digital commerce.
+            </p>
+          </div>
+
+          {/* View Mode Toggle: Canvas vs Mobile-Friendly Relational List */}
+          <div className="flex items-center space-x-1 border border-white/10 bg-[#0F1117] p-1 self-start md:self-auto">
+            <button
+              onClick={() => setViewMode('canvas')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs transition-all cursor-pointer ${
+                viewMode === 'canvas'
+                  ? 'border border-archival-amber/50 bg-archival-amber/15 text-archival-amber font-bold shadow-glow-amber-subtle'
+                  : 'text-museum-muted hover:text-white border border-transparent'
+              }`}
+            >
+              <Network className="h-3.5 w-3.5" />
+              <span>Graph Canvas</span>
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs transition-all cursor-pointer ${
+                viewMode === 'list'
+                  ? 'border border-archival-amber/50 bg-archival-amber/15 text-archival-amber font-bold shadow-glow-amber-subtle'
+                  : 'text-museum-muted hover:text-white border border-transparent'
+              }`}
+            >
+              <GitMerge className="h-3.5 w-3.5" />
+              <span>Relational Dossier (Mobile View)</span>
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Main Canvas + Inspector Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left / Center Graph Canvas */}
-        <div className={selectedNodeId ? 'lg:col-span-8' : 'lg:col-span-12'}>
-          {/* Controls & Filter Bar */}
-          <div className="border border-white/[0.08] bg-[#0F1117] p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs mb-3">
-            {/* Filter Dropdown & Strongest Toggle */}
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center space-x-1 border border-white/10 bg-[#151821] px-2.5 py-1">
-                <Filter className="h-3 w-3 text-archival-amber" />
-                <select
-                  value={sourceFilter}
-                  onChange={e => setSourceFilter(e.target.value)}
-                  className="bg-transparent text-white text-[11px] focus:outline-none cursor-pointer"
-                >
-                  <option value="all" className="bg-[#0F1117]">All Connections</option>
-                  <option value="cross" className="bg-[#0F1117]">Cross-Dataset Only</option>
-                  <option value="spotify" className="bg-[#0F1117]">Spotify Streams</option>
-                  <option value="household" className="bg-[#0F1117]">Household Ledger</option>
-                  <option value="commerce" className="bg-[#0F1117]">Commerce & Risk</option>
-                </select>
-              </div>
+      {/* Filter Controller Bar */}
+      <div className="border border-white/[0.08] bg-[#0F1117] p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center space-x-1 border border-white/10 bg-[#151821] px-2.5 py-1.5">
+            <Filter className="h-3.5 w-3.5 text-archival-amber" />
+            <select
+              value={sourceFilter}
+              onChange={e => setSourceFilter(e.target.value)}
+              className="bg-transparent text-white text-[11px] focus:outline-none cursor-pointer"
+            >
+              <option value="all" className="bg-[#0F1117]">All Connections</option>
+              <option value="cross" className="bg-[#0F1117]">Cross-Dataset Only</option>
+              <option value="spotify" className="bg-[#0F1117]">Spotify Streams</option>
+              <option value="household" className="bg-[#0F1117]">Household Ledger</option>
+              <option value="commerce" className="bg-[#0F1117]">Commerce & Risk</option>
+            </select>
+          </div>
 
-              <button
-                onClick={() => setShowStrongestOnly(!showStrongestOnly)}
-                className={`border px-3 py-1 text-[11px] transition-all ${
-                  showStrongestOnly
-                    ? 'border-archival-amber bg-archival-amber/20 text-archival-amber font-bold'
-                    : 'border-white/10 bg-[#151821] text-museum-muted hover:text-white'
-                }`}
+          <button
+            onClick={() => setShowStrongestOnly(!showStrongestOnly)}
+            className={`border px-3 py-1.5 text-[11px] transition-all cursor-pointer ${
+              showStrongestOnly
+                ? 'border-archival-amber bg-archival-amber/20 text-archival-amber font-bold'
+                : 'border-white/10 bg-[#151821] text-museum-muted hover:text-white'
+            }`}
+          >
+            <Zap className="h-3 w-3 inline mr-1" />
+            <span>Score ≥ 70</span>
+          </button>
+
+          {selectedNodeId && (
+            <button
+              onClick={() => setSelectedNodeId(null)}
+              className="flex items-center space-x-1 border border-white/10 bg-[#151821] px-2.5 py-1.5 text-[11px] text-museum-muted hover:text-archival-amber transition-colors cursor-pointer"
+            >
+              <RotateCcw className="h-3 w-3" />
+              <span>Reset</span>
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center space-x-3 text-[10px] text-museum-muted">
+          <span>{nodes.length} NODES</span>
+          <span>•</span>
+          <span>{filteredConnectionsList.length} EXPLAINABLE EDGES</span>
+        </div>
+      </div>
+
+      {/* VIEW 1: INTERACTIVE REACTFLOW CANVAS */}
+      {viewMode === 'canvas' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className={selectedNodeId ? 'lg:col-span-8' : 'lg:col-span-12'}>
+            <div className="h-[420px] sm:h-[620px] w-full border border-white/[0.08] bg-[#07080B] relative">
+              <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                nodeTypes={nodeTypes}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onNodeClick={handleNodeClick}
+                onPaneClick={handlePaneClick}
+                fitView
+                minZoom={0.2}
+                maxZoom={1.8}
               >
-                <Zap className="h-3 w-3 inline mr-1" />
-                <span>Strongest Only (Score ≥ 70)</span>
-              </button>
+                <Background color="#141722" gap={24} size={1} />
+                <Controls className="bg-[#0F1117] border border-white/10 text-white rounded-none shadow-lg" />
+              </ReactFlow>
 
-              {selectedNodeId && (
-                <button
-                  onClick={() => setSelectedNodeId(null)}
-                  className="flex items-center space-x-1 border border-white/10 bg-[#151821] px-2.5 py-1 text-[11px] text-museum-muted hover:text-archival-amber transition-colors"
-                >
-                  <RotateCcw className="h-3 w-3" />
-                  <span>Reset Selection</span>
-                </button>
-              )}
-            </div>
-
-            {/* Counts & Instructions */}
-            <div className="flex items-center space-x-3 text-[10px] text-museum-muted">
-              <span>{nodes.length} NODES</span>
-              <span>•</span>
-              <span>{edges.length} EXPLAINABLE EDGES</span>
+              <div className="absolute bottom-3 left-3 border border-white/10 bg-[#0F1117]/90 px-3 py-1.5 text-[9px] sm:text-[10px] text-museum-muted pointer-events-none">
+                <span>Tap any node to isolate connections and reveal explainable proof</span>
+              </div>
             </div>
           </div>
 
-          {/* Interactive ReactFlow Container */}
-          <div className="h-[620px] w-full border border-white/[0.08] bg-[#07080B] relative">
-            <ReactFlow
-              nodes={nodes}
-              edges={edges}
-              nodeTypes={nodeTypes}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              onNodeClick={handleNodeClick}
-              onPaneClick={handlePaneClick}
-              fitView
-              minZoom={0.2}
-              maxZoom={1.8}
-            >
-              <Background color="#141722" gap={24} size={1} />
-              <Controls className="bg-[#0F1117] border border-white/10 text-white rounded-none shadow-lg" />
-            </ReactFlow>
+          {selectedNodeId && (
+            <div className="lg:col-span-4 sticky top-24">
+              <GraphInspectorPanel
+                selectedReceipt={selectedReceipt}
+                selectedMoment={selectedMoment}
+                incidentConnections={incidentConnections}
+                onClearSelection={() => setSelectedNodeId(null)}
+                onSelectReceipt={onSelectReceipt}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
-            {/* Floating Hint Overlay */}
-            <div className="absolute bottom-3 left-3 border border-white/10 bg-[#0F1117]/90 px-3 py-1.5 text-[10px] text-museum-muted pointer-events-none">
-              <span>Click any node to isolate connections and reveal explainable proof</span>
+      {/* VIEW 2: RELATIONAL DOSSIER LIST (MOBILE-FRIENDLY FALLBACK) */}
+      {viewMode === 'list' && (
+        <div className="space-y-6">
+          {/* Section A: Multi-Receipt Central Moments */}
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2 text-xs font-bold text-archival-amber uppercase tracking-wider">
+              <Sparkles className="h-4 w-4" />
+              <span>CENTRAL EPISODIC MOMENTS ({moments.length})</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {moments.slice(0, 4).map(m => (
+                <div
+                  key={m.id}
+                  className="border border-white/10 bg-[#0F1117] p-4 space-y-3 hover:border-archival-amber/50 transition-colors"
+                >
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="border border-archival-amber/40 bg-archival-amber/10 px-2 py-0.5 text-archival-amber font-bold uppercase">
+                      {m.badge}
+                    </span>
+                    <span className="text-museum-muted">{m.timeRange.formattedSpan}</span>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-bold text-white font-serif">{m.title}</h4>
+                    <p className="text-xs font-serif italic text-museum-muted mt-0.5">{m.subtitle}</p>
+                  </div>
+
+                  <p className="text-xs font-serif text-[#D6D2C4] leading-relaxed border-t border-white/[0.04] pt-2">
+                    {m.explanation.summary}
+                  </p>
+
+                  <div className="space-y-1.5 pt-1">
+                    <span className="text-[9px] uppercase tracking-widest text-museum-faint block">
+                      CONSTITUENT ARTIFACTS ({m.receipts.length}):
+                    </span>
+                    {m.receipts.map(r => (
+                      <div
+                        key={r.id}
+                        onClick={() => onSelectReceipt(r)}
+                        className="flex items-center justify-between p-2 bg-[#151821] border border-white/5 hover:border-archival-amber/40 transition-colors cursor-pointer text-xs"
+                      >
+                        <div className="truncate pr-2">
+                          <span className="text-white font-bold block truncate">{r.title}</span>
+                          <span className="text-[10px] text-museum-muted">{r.source.toUpperCase()} • {r.dateStr}</span>
+                        </div>
+                        <span className="text-[10px] text-archival-amber whitespace-nowrap flex items-center">
+                          <span>Inspect</span>
+                          <Maximize2 className="h-2.5 w-2.5 ml-1" />
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Section B: Pairwise Cross-Dataset Connections */}
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
+              <GitMerge className="h-4 w-4" />
+              <span>VERIFIED RELATIONSHIP PAIRS ({filteredConnectionsList.length})</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredConnectionsList.map(conn => (
+                <div
+                  key={conn.id}
+                  className="border border-white/10 bg-[#0F1117] p-4 space-y-3 hover:border-emerald-500/50 transition-colors"
+                >
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className={`px-2 py-0.5 font-bold uppercase ${
+                      conn.strength === 'pivotal'
+                        ? 'border border-archival-amber/40 bg-archival-amber/10 text-archival-amber'
+                        : 'border border-emerald-900/50 bg-emerald-950/30 text-emerald-400'
+                    }`}>
+                      {conn.strength.toUpperCase()} LINK
+                    </span>
+                    <span className="text-white font-bold font-mono">Score: {conn.score}/100</span>
+                  </div>
+
+                  <div>
+                    <h4 className="text-xs font-bold text-white uppercase">{conn.relationshipType}</h4>
+                    <p className="text-[11px] font-mono text-archival-amber mt-0.5">{conn.sourceReceipt.title} ↔ {conn.targetReceipt.title}</p>
+                  </div>
+
+                  <p className="text-xs font-serif text-[#D6D2C4] leading-relaxed border-t border-white/[0.04] pt-2">
+                    {conn.reasons.join(' • ')}
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/[0.04] text-[10px]">
+                    <button
+                      onClick={() => onSelectReceipt(conn.sourceReceipt)}
+                      className="p-2 bg-[#151821] border border-white/10 text-left hover:border-archival-amber transition-colors cursor-pointer"
+                    >
+                      <span className="text-museum-faint block uppercase">EXHIBIT A:</span>
+                      <span className="text-white font-bold truncate block">{conn.sourceReceipt.title}</span>
+                      <span className="text-archival-amber">{conn.sourceReceipt.source}</span>
+                    </button>
+
+                    <button
+                      onClick={() => onSelectReceipt(conn.targetReceipt)}
+                      className="p-2 bg-[#151821] border border-white/10 text-left hover:border-archival-amber transition-colors cursor-pointer"
+                    >
+                      <span className="text-museum-faint block uppercase">EXHIBIT B:</span>
+                      <span className="text-white font-bold truncate block">{conn.targetReceipt.title}</span>
+                      <span className="text-archival-amber">{conn.targetReceipt.source}</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-
-        {/* Right Selected Node Inspector Panel */}
-        {selectedNodeId && (
-          <div className="lg:col-span-4 sticky top-24">
-            <GraphInspectorPanel
-              selectedReceipt={selectedReceipt}
-              selectedMoment={selectedMoment}
-              incidentConnections={incidentConnections}
-              onClearSelection={() => setSelectedNodeId(null)}
-              onSelectReceipt={onSelectReceipt}
-            />
-          </div>
-        )}
-      </div>
+      )}
 
       <CuratorNote headline="Topological Grounding Standard">
         "Every visible edge on this graph represents a verified, explainable relationship discovered through temporal synchrony, geographic co-location, shared merchant entities, or sequential financial life workflows. No decorative or synthetic connections are rendered."
