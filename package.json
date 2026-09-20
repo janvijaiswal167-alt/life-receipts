@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --experimental-strip-types run_tests.ts",
+    "bench": "node --experimental-strip-types perf_benchmark.ts"
   },
   "dependencies": {
     "@xyflow/react": "^12.4.4",

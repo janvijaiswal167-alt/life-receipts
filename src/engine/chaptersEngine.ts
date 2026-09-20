@@ -50,20 +50,34 @@ function computeActivityBreakdown(receipts: LifeReceipt[]): ChapterActivityBreak
     }));
 }
 
+let lastChaptersInput: LifeReceipt[] | null = null;
+let lastChaptersResult: LifeChapter[] | null = null;
+
 /**
- * Discovers and builds meaningful life chapters from normalized receipts
+ * Discovers and builds meaningful life chapters from normalized receipts (memoized)
  */
 export function discoverLifeChapters(receipts: LifeReceipt[]): LifeChapter[] {
   if (!receipts || receipts.length === 0) return [];
+  if (lastChaptersInput === receipts && lastChaptersResult) {
+    return lastChaptersResult;
+  }
 
   const allMoments = extractLifeMoments(receipts);
   const allConnections = discoverCrossConnections(receipts);
 
-  // Partition receipts chronologically by meaningful operational regimes
-  const era1Receipts = receipts.filter(r => r.year >= 2013 && r.year <= 2014);
-  const era2Receipts = receipts.filter(r => r.year >= 2015 && r.year <= 2018);
-  const era3Receipts = receipts.filter(r => r.year >= 2019 && r.year <= 2021);
-  const era4Receipts = receipts.filter(r => r.year >= 2022 && r.year <= 2024);
+  // Partition receipts chronologically in a single O(N) pass
+  const era1Receipts: LifeReceipt[] = [];
+  const era2Receipts: LifeReceipt[] = [];
+  const era3Receipts: LifeReceipt[] = [];
+  const era4Receipts: LifeReceipt[] = [];
+
+  for (let i = 0; i < receipts.length; i++) {
+    const r = receipts[i];
+    if (r.year >= 2013 && r.year <= 2014) era1Receipts.push(r);
+    else if (r.year >= 2015 && r.year <= 2018) era2Receipts.push(r);
+    else if (r.year >= 2019 && r.year <= 2021) era3Receipts.push(r);
+    else if (r.year >= 2022 && r.year <= 2024) era4Receipts.push(r);
+  }
 
   const chapters: LifeChapter[] = [];
 
@@ -334,5 +348,7 @@ export function discoverLifeChapters(receipts: LifeReceipt[]): LifeChapter[] {
     tags: ['Master Archive', '11 Years', 'Unified Life', 'Decade Wrap'],
   });
 
+  lastChaptersInput = receipts;
+  lastChaptersResult = chapters;
   return chapters;
 }

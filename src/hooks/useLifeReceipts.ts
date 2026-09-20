@@ -73,6 +73,26 @@ export function useLifeReceipts(): UseLifeReceiptsReturn {
     isFraudOnly: false,
   });
 
+  // Debounce search query to prevent heavy analytical recalculation on every keystroke
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState<string>(filters.searchQuery || '');
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(filters.searchQuery || '');
+    }, 200);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [filters.searchQuery]);
+
+  const effectiveFilters = useMemo<QueryFilters>(() => {
+    return {
+      ...filters,
+      searchQuery: debouncedSearchQuery,
+    };
+  }, [filters, debouncedSearchQuery]);
+
   // Load datasets
   const loadData = useCallback(async (sample = useSampleMode) => {
     try {
@@ -112,17 +132,20 @@ export function useLifeReceipts(): UseLifeReceiptsReturn {
     return graphEngine.discoverConnections({ minScore: 40, limit: 100 });
   }, [graphEngine, receipts]);
 
-  // Compute filtered receipts reactive to filters
+  // Compute filtered receipts reactive to debounced filters
   const filteredReceipts = useMemo(() => {
     if (!store) return [];
-    return store.query(filters);
-  }, [store, filters]);
+    return store.query(effectiveFilters);
+  }, [store, effectiveFilters]);
 
-  // Compute aggregates
+  // Compute aggregates (returns precomputed cached aggregates in O(1) if full dataset)
   const aggregates = useMemo(() => {
     if (!store) return null;
-    return store.getAggregates(filteredReceipts.length > 0 ? filteredReceipts : undefined);
-  }, [store, filteredReceipts]);
+    if (filteredReceipts.length === receipts.length) {
+      return store.getAggregates();
+    }
+    return store.getAggregates(filteredReceipts);
+  }, [store, filteredReceipts, receipts.length]);
 
   // Generate stories
   const storyChapters = useMemo(() => {

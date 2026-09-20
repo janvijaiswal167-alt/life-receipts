@@ -7,7 +7,7 @@ interface MuseumReceiptCardProps {
   onSelect?: (r: LifeReceipt) => void;
 }
 
-export const MuseumReceiptCard: React.FC<MuseumReceiptCardProps> = ({
+const MuseumReceiptCardComponent: React.FC<MuseumReceiptCardProps> = ({
   receipt,
   onSelect,
 }) => {
@@ -58,24 +58,27 @@ export const MuseumReceiptCard: React.FC<MuseumReceiptCardProps> = ({
             {receipt.title}
           </h4>
           {isFraud && (
-            <span className="flex items-center space-x-1 border border-red-800/50 bg-red-950/30 px-1.5 py-0.2 text-[9px] font-mono text-red-400">
+            <span className="flex items-center space-x-1 border border-red-900/50 bg-red-950/40 px-1.5 py-0.5 text-[9px] font-mono font-bold text-red-400">
               <AlertOctagon className="h-2.5 w-2.5" />
-              <span>FLAG</span>
+              <span>ALERT</span>
             </span>
           )}
         </div>
-        <p className="text-xs text-museum-muted font-serif italic mt-0.5 line-clamp-1">
-          {receipt.subtitle}
-        </p>
+
+        {receipt.subtitle && (
+          <p className="mt-0.5 text-xs text-museum-muted line-clamp-1 font-serif italic">
+            {receipt.subtitle}
+          </p>
+        )}
       </div>
 
-      {/* Spatial Context */}
-      {receipt.location?.context && (
-        <div className="flex items-center space-x-1.5 text-[10px] text-museum-muted mb-3 font-mono">
-          <MapPin className="h-3 w-3 text-archival-amber/70 flex-shrink-0" />
+      {/* Location / Context Vector */}
+      {receipt.location?.city && (
+        <div className="flex items-center space-x-1.5 text-[10px] font-mono text-museum-faint mb-3">
+          <MapPin className="h-3 w-3 text-archival-amber/70" />
           <span className="truncate">
-            {receipt.location.city ? `${receipt.location.city} • ` : ''}
-            {receipt.location.context}
+            {receipt.location.city}
+            {receipt.location.state ? `, ${receipt.location.state}` : ''}
           </span>
         </div>
       )}
@@ -101,3 +104,5 @@ export const MuseumReceiptCard: React.FC<MuseumReceiptCardProps> = ({
     </div>
   );
 };
+
+export const MuseumReceiptCard = React.memo(MuseumReceiptCardComponent);

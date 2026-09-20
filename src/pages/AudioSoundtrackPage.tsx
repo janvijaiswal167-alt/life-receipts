@@ -3,7 +3,7 @@ import { LifeReceipt } from '../types/receipt';
 import { VitrineMetric } from '../components/museum/VitrineMetric';
 import { MuseumReceiptCard } from '../components/museum/MuseumReceiptCard';
 import { CuratorNote } from '../components/museum/CuratorNote';
-import { Music2, Radio, Disc, Smartphone } from 'lucide-react';
+import { Music, Clock, Radio, Headphones } from 'lucide-react';
 import {
   ResponsiveContainer,
   BarChart,
@@ -40,6 +40,17 @@ export const AudioSoundtrackPage: React.FC<AudioSoundtrackPageProps> = ({
     .slice(0, 10)
     .map(([name, plays]) => ({ name, plays }));
 
+  const [currentPage, setCurrentPage] = React.useState<number>(1);
+  const itemsPerPage = 18;
+  const totalItems = spotReceipts.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const validPage = Math.min(Math.max(1, currentPage), totalPages);
+
+  const paginatedReceipts = React.useMemo(() => {
+    const start = (validPage - 1) * itemsPerPage;
+    return spotReceipts.slice(start, start + itemsPerPage);
+  }, [spotReceipts, validPage, itemsPerPage]);
+
   return (
     <div className="space-y-10 animate-fadeIn">
       {/* Editorial Header */}
@@ -59,42 +70,42 @@ export const AudioSoundtrackPage: React.FC<AudioSoundtrackPageProps> = ({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <VitrineMetric
           catalogNo="AUDIO #01"
-          title="Playback Duration"
-          value={`${totalHours}h`}
-          annotation="5,341 total hours across 11.4 years"
-          icon={Music2}
+          title="Total Streams"
+          value={spotReceipts.length.toLocaleString()}
+          annotation="11 calendar years logged"
+          icon={Music}
           accent
         />
         <VitrineMetric
           catalogNo="AUDIO #02"
-          title="#1 Top Artist"
-          value={topArtistsData[0]?.name || 'The Beatles'}
-          annotation={`${topArtistsData[0]?.plays.toLocaleString()} plays recorded`}
-          icon={Disc}
+          title="Playback Hours"
+          value={`${totalHours.toLocaleString()}h`}
+          annotation="Across desktop and mobile"
+          icon={Clock}
         />
         <VitrineMetric
           catalogNo="AUDIO #03"
-          title="#2 Top Artist"
-          value={topArtistsData[1]?.name || 'The Killers'}
-          annotation={`${topArtistsData[1]?.plays.toLocaleString()} plays recorded`}
+          title="Top Discography"
+          value="The Beatles"
+          annotation="13,621 total plays"
           icon={Radio}
         />
         <VitrineMetric
           catalogNo="AUDIO #04"
-          title="Primary Medium"
-          value="Mobile Stream"
-          annotation="93.3% on Android & iOS transit"
-          icon={Smartphone}
+          title="Late Night Peak"
+          value="23:00–02:00"
+          annotation="Deep study and focus hours"
+          icon={Headphones}
         />
       </div>
 
-      {/* Top 10 Artists Chart */}
+      {/* Top Artists Chart */}
       <div className="border border-white/[0.08] bg-[#0F1117] p-6 sm:p-8">
         <span className="text-[9px] font-mono tracking-widest text-museum-muted uppercase">
-          CHART 4.1 // DISCOGRAPHY REPETITION INDEX
+          CHART 4.1 // ARTIST DISCOGRAPHY AFFINITY
         </span>
         <h3 className="text-sm font-mono font-bold text-white tracking-wide mt-1 border-b border-white/[0.06] pb-3">
-          MOST STREAMED ARTISTS (TOTAL PLAYS)
+          MOST FREQUENTED ARTISTS (TOTAL TRACK PLAYS)
         </h3>
 
         <div className="mt-6 h-64 w-full">
@@ -123,13 +134,19 @@ export const AudioSoundtrackPage: React.FC<AudioSoundtrackPageProps> = ({
         "Over 13,600 plays were dedicated to The Beatles—most notably during late evening study hours between 2016 and 2018. Over 74% of tracks were played on shuffle, yet completion rates remained above 94%, signaling deep intentional listening."
       </CuratorNote>
 
-      {/* Feed */}
+      {/* Streaming Logs List with Pagination */}
       <div className="space-y-4">
-        <h3 className="text-base font-mono font-bold text-white tracking-wide border-b border-white/[0.08] pb-2">
-          AUTHENTIC STREAMING LOGS
-        </h3>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.08] pb-3 gap-2">
+          <h3 className="text-base font-mono font-bold text-white tracking-wide">
+            AUTHENTIC STREAMING LOGS
+          </h3>
+          <span className="text-xs font-mono text-museum-muted">
+            Showing {((validPage - 1) * itemsPerPage) + 1}–{Math.min(validPage * itemsPerPage, totalItems)} of {totalItems.toLocaleString()} streams
+          </span>
+        </div>
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {spotReceipts.slice(0, 18).map(receipt => (
+          {paginatedReceipts.map(receipt => (
             <MuseumReceiptCard
               key={receipt.id}
               receipt={receipt}
@@ -137,6 +154,31 @@ export const AudioSoundtrackPage: React.FC<AudioSoundtrackPageProps> = ({
             />
           ))}
         </div>
+
+        {/* Pagination Bar */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between border-t border-white/[0.08] pt-4 text-xs font-mono text-museum-muted">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={validPage === 1}
+              className="border border-white/10 bg-[#0F1117] px-3 py-1.5 hover:border-archival-amber/60 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+            >
+              ← Previous
+            </button>
+
+            <span className="text-white">
+              Page <span className="text-archival-amber font-bold">{validPage}</span> of {totalPages.toLocaleString()}
+            </span>
+
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={validPage === totalPages}
+              className="border border-white/10 bg-[#0F1117] px-3 py-1.5 hover:border-archival-amber/60 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+            >
+              Next →
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

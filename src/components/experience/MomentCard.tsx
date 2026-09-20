@@ -9,7 +9,7 @@ interface MomentCardProps {
   onSelectReceipt?: (r: LifeReceipt) => void;
 }
 
-export const MomentCard: React.FC<MomentCardProps> = ({
+const MomentCardComponent: React.FC<MomentCardProps> = ({
   moment,
   onOpenMoment,
 }) => {
@@ -58,25 +58,22 @@ export const MomentCard: React.FC<MomentCardProps> = ({
           </div>
         )}
 
-        {/* Receipt Mini Thumbnail Stack Preview */}
-        <div className="mt-4 pt-3 border-t border-white/[0.06] space-y-1.5">
-          <div className="flex items-center justify-between text-[9px] text-museum-faint uppercase tracking-wider">
-            <span className="flex items-center space-x-1">
-              <Layers className="h-2.5 w-2.5 text-archival-amber" />
-              <span>EPISODE RECEIPTS ({moment.receipts.length})</span>
-            </span>
-            <span>{moment.stats.sources.join(' + ').toUpperCase()}</span>
-          </div>
-
-          <div className="space-y-1">
-            {moment.receipts.slice(0, 3).map((r, idx) => (
+        {/* Evidence Snapshot List */}
+        <div className="mt-4 pt-3 border-t border-white/[0.04] space-y-2">
+          <span className="text-[9px] uppercase tracking-widest text-museum-faint block">
+            CONSTITUENT ARTIFACTS ({moment.receipts.length})
+          </span>
+          <div className="space-y-1.5">
+            {moment.receipts.slice(0, 3).map(r => (
               <div
                 key={r.id}
-                className="flex items-center justify-between bg-[#12141C] border border-white/[0.04] px-2 py-1 text-[10px] text-museum-muted"
+                className="flex items-center justify-between text-[11px] border border-white/[0.04] bg-[#151821] px-2.5 py-1.5"
               >
-                <div className="flex items-center space-x-1.5 truncate pr-2">
-                  <span className="text-archival-amber font-bold text-[9px]">0{idx + 1}</span>
-                  <span className="truncate text-white text-[10px]">{r.title}</span>
+                <div className="flex items-center space-x-2 truncate pr-2">
+                  <span className="text-[9px] font-bold text-archival-amber/90 uppercase w-12 flex-shrink-0">
+                    {r.source === 'spotify' ? 'Audio' : r.source === 'household' ? 'Cash' : 'Card'}
+                  </span>
+                  <span className="text-museum-text truncate">{r.title}</span>
                 </div>
                 <span className="text-[9px] text-museum-faint whitespace-nowrap">
                   {r.amount != null ? `₹${r.amount}` : r.metadata?.durationFormatted || r.source}
@@ -106,3 +103,5 @@ export const MomentCard: React.FC<MomentCardProps> = ({
     </div>
   );
 };
+
+export const MomentCard = React.memo(MomentCardComponent);

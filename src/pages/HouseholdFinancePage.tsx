@@ -49,6 +49,17 @@ export const HouseholdFinancePage: React.FC<HouseholdFinancePageProps> = ({
     .slice(0, 8)
     .map(([name, amount]) => ({ name, amount: Math.round(amount) }));
 
+  const [currentPage, setCurrentPage] = React.useState<number>(1);
+  const itemsPerPage = 18;
+  const totalItems = hhReceipts.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const validPage = Math.min(Math.max(1, currentPage), totalPages);
+
+  const paginatedReceipts = React.useMemo(() => {
+    const start = (validPage - 1) * itemsPerPage;
+    return hhReceipts.slice(start, start + itemsPerPage);
+  }, [hhReceipts, validPage, itemsPerPage]);
+
   return (
     <div className="space-y-10 animate-fadeIn">
       {/* Editorial Header */}
@@ -132,13 +143,19 @@ export const HouseholdFinancePage: React.FC<HouseholdFinancePageProps> = ({
         "Between 07:00 and 08:30 each morning, the ledger records a repeated sequence: milk vendor settlement (₹30-₹60), cutting chai with two Parle-G biscuits (₹15), followed by an auto-rickshaw to Place 2 Station (₹50). Meticulous micro-accounting reveals the rhythmic heartbeat of urban Indian life."
       </CuratorNote>
 
-      {/* Household Artifacts List */}
+      {/* Household Artifacts List with Pagination */}
       <div className="space-y-4">
-        <h3 className="text-base font-mono font-bold text-white tracking-wide border-b border-white/[0.08] pb-2">
-          HOUSEHOLD LEDGER ARTIFACTS
-        </h3>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.08] pb-3 gap-2">
+          <h3 className="text-base font-mono font-bold text-white tracking-wide">
+            HOUSEHOLD LEDGER ARTIFACTS
+          </h3>
+          <span className="text-xs font-mono text-museum-muted">
+            Showing {((validPage - 1) * itemsPerPage) + 1}–{Math.min(validPage * itemsPerPage, totalItems)} of {totalItems.toLocaleString()} artifacts
+          </span>
+        </div>
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {hhReceipts.slice(0, 18).map(receipt => (
+          {paginatedReceipts.map(receipt => (
             <MuseumReceiptCard
               key={receipt.id}
               receipt={receipt}
@@ -146,6 +163,31 @@ export const HouseholdFinancePage: React.FC<HouseholdFinancePageProps> = ({
             />
           ))}
         </div>
+
+        {/* Pagination Bar */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between border-t border-white/[0.08] pt-4 text-xs font-mono text-museum-muted">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={validPage === 1}
+              className="border border-white/10 bg-[#0F1117] px-3 py-1.5 hover:border-archival-amber/60 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+            >
+              ← Previous
+            </button>
+
+            <span className="text-white">
+              Page <span className="text-archival-amber font-bold">{validPage}</span> of {totalPages}
+            </span>
+
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={validPage === totalPages}
+              className="border border-white/10 bg-[#0F1117] px-3 py-1.5 hover:border-archival-amber/60 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+            >
+              Next →
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

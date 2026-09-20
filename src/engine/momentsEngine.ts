@@ -31,8 +31,13 @@ export class LifeMomentsEngine {
     this.graphEngine = graphEngine || new LifeGraphEngine(receipts);
   }
 
+  private cachedMoments: LifeMoment[] | null = null;
+  private lastReceiptsRef: LifeReceipt[] | null = null;
+
   public setReceipts(receipts: LifeReceipt[]): void {
     this.receipts = receipts;
+    this.cachedMoments = null;
+    this.lastReceiptsRef = receipts;
     this.graphEngine.loadReceipts(receipts);
   }
 
@@ -40,12 +45,59 @@ export class LifeMomentsEngine {
    * Extracts and clusters all authentic moments/episodes across the ledger
    */
   public extractMoments(): LifeMoment[] {
+    if (this.cachedMoments && this.lastReceiptsRef === this.receipts) {
+      return this.cachedMoments;
+    }
+
     const moments: LifeMoment[] = [];
     const usedReceiptIds = new Set<string>();
 
-    const spotify = this.receipts.filter(r => r.source === 'spotify');
-    const household = this.receipts.filter(r => r.source === 'household');
-    const commerce = this.receipts.filter(r => r.source === 'commerce');
+    const spotify: LifeReceipt[] = [];
+    const household: LifeReceipt[] = [];
+    const commerce: LifeReceipt[] = [];
+
+    const spotifyByDate = new Map<string, LifeReceipt[]>();
+    const spotifyByYearMonth = new Map<string, LifeReceipt[]>();
+    const householdByDate = new Map<string, LifeReceipt[]>();
+    const commerceByDate = new Map<string, LifeReceipt[]>();
+
+    const len = this.receipts.length;
+    for (let i = 0; i < len; i++) {
+      const r = this.receipts[i];
+      if (r.source === 'spotify') {
+        spotify.push(r);
+        let dArr = spotifyByDate.get(r.dateStr);
+        if (!dArr) {
+          dArr = [];
+          spotifyByDate.set(r.dateStr, dArr);
+        }
+        dArr.push(r);
+
+        const ym = r.dateStr.slice(0, 7);
+        let ymArr = spotifyByYearMonth.get(ym);
+        if (!ymArr) {
+          ymArr = [];
+          spotifyByYearMonth.set(ym, ymArr);
+        }
+        ymArr.push(r);
+      } else if (r.source === 'household') {
+        household.push(r);
+        let dArr = householdByDate.get(r.dateStr);
+        if (!dArr) {
+          dArr = [];
+          householdByDate.set(r.dateStr, dArr);
+        }
+        dArr.push(r);
+      } else if (r.source === 'commerce') {
+        commerce.push(r);
+        let dArr = commerceByDate.get(r.dateStr);
+        if (!dArr) {
+          dArr = [];
+          commerceByDate.set(r.dateStr, dArr);
+        }
+        dArr.push(r);
+      }
+    }
 
     // ----------------------------------------------------
     // MOMENT 1: Morning Commute & Acoustic Soundtrack Episode
@@ -55,7 +107,8 @@ export class LifeMomentsEngine {
     );
 
     for (const tr of transitHh) {
-      const matchSpot = spotify.filter(s => s.dateStr === tr.dateStr && Math.abs(s.hour - tr.hour) <= 2);
+      const daySpots = spotifyByDate.get(tr.dateStr) || [];
+      const matchSpot = daySpots.filter(s => Math.abs(s.hour - tr.hour) <= 2);
       if (matchSpot.length >= 1) {
         const episodeReceipts = [tr, ...matchSpot.slice(0, 3)];
         episodeReceipts.forEach(r => usedReceiptIds.add(r.id));
@@ -105,8 +158,10 @@ export class LifeMomentsEngine {
 
     if (morningFood.length >= 2) {
       const targetDate = morningFood[0].dateStr;
-      const sameDateFood = household.filter(r => r.dateStr === targetDate);
-      const sameDateSpot = spotify.filter(s => s.dateStr === targetDate && s.hour >= 7 && s.hour <= 10).slice(0, 2);
+      const sameDateFood = householdByDate.get(targetDate) || [];
+      const sameDateSpot = (spotifyByDate.get(targetDate) || [])
+        .filter(s => s.hour >= 7 && s.hour <= 10)
+        .slice(0, 2);
 
       const episodeReceipts = [...sameDateFood, ...sameDateSpot];
       episodeReceipts.forEach(r => usedReceiptIds.add(r.id));
@@ -202,7 +257,7 @@ export class LifeMomentsEngine {
     const sevagramList = household.filter(r => (r.title + r.description).toLowerCase().includes('sevagram'));
     if (sevagramList.length > 0) {
       const train = sevagramList[0];
-      const matchSpot = spotify.filter(s => s.dateStr === train.dateStr).slice(0, 3);
+      const matchSpot = (spotifyByDate.get(train.dateStr) || []).slice(0, 3);
       const episodeReceipts = [train, ...matchSpot];
       episodeReceipts.forEach(r => usedReceiptIds.add(r.id));
 
@@ -249,7 +304,8 @@ export class LifeMomentsEngine {
 
     if (audibleNetflix.length > 0) {
       const sub = audibleNetflix[0];
-      const spotMonth = spotify.filter(s => s.year === sub.year && s.month === sub.month).slice(0, 3);
+      const ym = sub.dateStr.slice(0, 7);
+      const spotMonth = (spotifyByYearMonth.get(ym) || []).slice(0, 3);
       const episodeReceipts = [sub, ...spotMonth];
       episodeReceipts.forEach(r => usedReceiptIds.add(r.id));
 
@@ -293,7 +349,7 @@ export class LifeMomentsEngine {
     const fraudList = commerce.filter(r => r.metadata?.isFraud === true);
     if (fraudList.length > 0) {
       const fraudTx = fraudList[0];
-      const sameDateComm = commerce.filter(c => c.dateStr === fraudTx.dateStr && c.id !== fraudTx.id).slice(0, 2);
+      const sameDateComm = (commerceByDate.get(fraudTx.dateStr) || []).filter(c => c.id !== fraudTx.id).slice(0, 2);
       const episodeReceipts = [fraudTx, ...sameDateComm];
       episodeReceipts.forEach(r => usedReceiptIds.add(r.id));
 
@@ -335,7 +391,8 @@ export class LifeMomentsEngine {
     // GENERAL EPISODE CLUSTERING: Temporal-Spatial Co-occurrence
     // ----------------------------------------------------
     const byDate = new Map<string, LifeReceipt[]>();
-    for (const r of this.receipts) {
+    for (let i = 0; i < len; i++) {
+      const r = this.receipts[i];
       if (usedReceiptIds.has(r.id)) continue;
       let arr = byDate.get(r.dateStr);
       if (!arr) {
@@ -373,6 +430,8 @@ export class LifeMomentsEngine {
       }
     }
 
+    this.cachedMoments = moments;
+    this.lastReceiptsRef = this.receipts;
     return moments;
   }
 
@@ -510,13 +569,25 @@ export class LifeMomentsEngine {
   }
 }
 
+// Global cache for the functional helper
+let lastExtractReceiptsArg: LifeReceipt[] | null = null;
+let lastExtractMomentsResult: LifeMoment[] | null = null;
+
 /**
- * Functional helper to extract moments from receipts
+ * Functional helper to extract moments from receipts (memoized)
  */
 export function extractLifeMoments(
   receipts: LifeReceipt[],
   graphEngine?: LifeGraphEngine
 ): LifeMoment[] {
+  if (lastExtractReceiptsArg === receipts && lastExtractMomentsResult && !graphEngine) {
+    return lastExtractMomentsResult;
+  }
   const engine = new LifeMomentsEngine(receipts, graphEngine);
-  return engine.extractMoments();
+  const result = engine.extractMoments();
+  if (!graphEngine) {
+    lastExtractReceiptsArg = receipts;
+    lastExtractMomentsResult = result;
+  }
+  return result;
 }

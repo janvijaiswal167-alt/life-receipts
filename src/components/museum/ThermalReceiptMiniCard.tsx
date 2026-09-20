@@ -7,7 +7,7 @@ interface ThermalReceiptMiniCardProps {
   onSelect?: (r: LifeReceipt) => void;
 }
 
-export const ThermalReceiptMiniCard: React.FC<ThermalReceiptMiniCardProps> = ({
+const ThermalReceiptMiniCardComponent: React.FC<ThermalReceiptMiniCardProps> = ({
   receipt,
   onSelect,
 }) => {
@@ -106,3 +106,5 @@ export const ThermalReceiptMiniCard: React.FC<ThermalReceiptMiniCardProps> = ({
     </div>
   );
 };
+
+export const ThermalReceiptMiniCard = React.memo(ThermalReceiptMiniCardComponent);

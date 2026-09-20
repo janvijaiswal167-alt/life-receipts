@@ -15,7 +15,27 @@ import {
 interface DiscoveryCardProps {
   discovery: LifeDiscovery;
   onExplore: (discovery: LifeDiscovery) => void;
+  isSelected?: boolean;
 }
+
+const getDiscoveryTypeLabel = (type: DiscoveryType): string => {
+  switch (type) {
+    case 'micro_anomaly':
+      return 'Micro-Anomaly';
+    case 'recurring_place':
+      return 'Recurring Place';
+    case 'repeated_entity':
+      return 'Repeated Entity';
+    case 'dense_cluster':
+      return 'Activity Cluster';
+    case 'unexpected_sequence':
+      return 'Unexpected Sequence';
+    case 'strong_connection':
+      return 'Strong Connection';
+    default:
+      return 'Discovery';
+  }
+};
 
 const getDiscoveryIcon = (type: DiscoveryType) => {
   switch (type) {
@@ -36,52 +56,70 @@ const getDiscoveryIcon = (type: DiscoveryType) => {
   }
 };
 
-export const DiscoveryCard: React.FC<DiscoveryCardProps> = ({ discovery, onExplore }) => {
+const DiscoveryCardComponent: React.FC<DiscoveryCardProps> = ({
+  discovery,
+  onExplore,
+  isSelected = false,
+}) => {
   return (
     <div
       onClick={() => onExplore(discovery)}
-      className="group relative flex flex-col justify-between border border-white/[0.08] bg-[#0F1117] hover:border-archival-amber/50 hover:bg-[#131622] rounded-lg p-6 transition-all duration-300 cursor-pointer overflow-hidden space-y-4"
+      className={`group relative flex flex-col justify-between p-5 rounded-lg border transition-all duration-300 cursor-pointer overflow-hidden ${
+        isSelected
+          ? 'bg-archival-amber/[0.08] border-archival-amber shadow-[0_0_25px_rgba(212,163,115,0.15)]'
+          : 'bg-[#0F1117] border-white/[0.08] hover:border-white/20 hover:bg-[#151821]'
+      }`}
     >
       {/* Top Accent Strip */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-transparent group-hover:bg-archival-amber transition-all duration-300" />
+      <div
+        className={`absolute top-0 left-0 right-0 h-[2px] transition-all duration-300 ${
+          isSelected ? 'bg-archival-amber' : 'bg-transparent group-hover:bg-white/20'
+        }`}
+      />
 
-      <div className="space-y-3">
-        {/* Header Badges */}
-        <div className="flex items-center justify-between gap-2 text-[10px] font-mono">
+      <div>
+        {/* Header Metadata */}
+        <div className="flex items-center justify-between gap-2 text-[10px] font-mono mb-2.5">
           <div className="flex items-center space-x-1.5 px-2 py-0.5 rounded bg-white/[0.04] border border-white/[0.06]">
             {getDiscoveryIcon(discovery.type)}
             <span className="text-white/80 uppercase tracking-wider font-semibold">
-              {discovery.badge || 'SURPRISING DISCOVERY'}
+              {discovery.badge || getDiscoveryTypeLabel(discovery.type)}
             </span>
           </div>
 
-          <span className="border border-white/10 bg-[#161925] px-2 py-0.5 text-archival-amber font-bold rounded">
+          <div className="flex items-center space-x-2">
+            <span className="text-[9px] font-mono font-bold text-archival-amber border border-archival-amber/30 px-1.5 py-0.5 rounded bg-archival-amber/10">
+              SURPRISE {discovery.surpriseScore}/100
+            </span>
+          </div>
+        </div>
+
+        {/* Title */}
+        <h3 className="text-base font-serif font-bold text-white group-hover:text-archival-amber transition-colors line-clamp-2 leading-snug">
+          {discovery.title}
+        </h3>
+
+        {/* Metric Value */}
+        <div className="mt-3 p-2.5 bg-black/40 border border-white/[0.06] rounded font-mono">
+          <span className="text-[9px] text-museum-muted uppercase tracking-widest block mb-0.5">
+            MEASURED ANOMALY / DISCOVERY
+          </span>
+          <span className="text-xs font-bold text-archival-amber tracking-tight line-clamp-1">
             {discovery.metric}
           </span>
         </div>
 
-        {/* Title */}
-        <h3 className="text-base font-serif font-bold text-white group-hover:text-archival-amber transition-colors leading-snug">
-          {discovery.title}
-        </h3>
-
-        {/* Evidence Box */}
-        <div className="p-3 bg-black/40 border-l-2 border-archival-amber rounded-r font-serif text-xs text-[#E5E2D9] leading-relaxed">
-          <span className="text-[9px] font-mono text-archival-amber uppercase not-italic tracking-wider font-semibold block mb-0.5">
-            VERIFIED EVIDENCE
-          </span>
-          {discovery.evidence}
-        </div>
-
         {/* Explanation */}
-        <p className="text-xs font-serif italic text-museum-muted leading-relaxed">
+        <p className="text-xs font-serif italic text-museum-muted mt-3 line-clamp-3 leading-relaxed">
           {discovery.explanation}
         </p>
       </div>
 
       {/* Footer Info & Explore Action */}
-      <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[10px] font-mono text-museum-muted">
-        <span className="truncate max-w-[200px]">{discovery.context}</span>
+      <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-[10px] font-mono text-museum-muted">
+        <span className="text-museum-muted truncate max-w-[160px]">
+          {discovery.context}
+        </span>
 
         <button
           onClick={(e) => {
@@ -97,3 +135,5 @@ export const DiscoveryCard: React.FC<DiscoveryCardProps> = ({ discovery, onExplo
     </div>
   );
 };
+
+export const DiscoveryCard = React.memo(DiscoveryCardComponent);

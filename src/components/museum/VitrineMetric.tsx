@@ -10,7 +10,7 @@ interface VitrineMetricProps {
   icon?: LucideIcon;
 }
 
-export const VitrineMetric: React.FC<VitrineMetricProps> = ({
+const VitrineMetricComponent: React.FC<VitrineMetricProps> = ({
   catalogNo,
   title,
   value,
@@ -60,3 +60,5 @@ export const VitrineMetric: React.FC<VitrineMetricProps> = ({
     </div>
   );
 };
+
+export const VitrineMetric = React.memo(VitrineMetricComponent);

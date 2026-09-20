@@ -3,7 +3,7 @@ import { LifeReceipt } from '../types/receipt';
 import { VitrineMetric } from '../components/museum/VitrineMetric';
 import { MuseumReceiptCard } from '../components/museum/MuseumReceiptCard';
 import { CuratorNote } from '../components/museum/CuratorNote';
-import { CreditCard, ShieldAlert, ShieldCheck, Building } from 'lucide-react';
+import { CreditCard, ShieldAlert, ShieldCheck, Building, MapPin, Lock } from 'lucide-react';
 import {
   ResponsiveContainer,
   PieChart,
@@ -33,6 +33,17 @@ export const CommerceSecurityPage: React.FC<CommerceSecurityPageProps> = ({
     { name: 'Verified Legitimate', value: verifiedCount, color: '#D4A373' },
   ];
 
+  const [currentPage, setCurrentPage] = React.useState<number>(1);
+  const itemsPerPage = 18;
+  const totalItems = commReceipts.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const validPage = Math.min(Math.max(1, currentPage), totalPages);
+
+  const paginatedReceipts = React.useMemo(() => {
+    const start = (validPage - 1) * itemsPerPage;
+    return commReceipts.slice(start, start + itemsPerPage);
+  }, [commReceipts, validPage, itemsPerPage]);
+
   return (
     <div className="space-y-10 animate-fadeIn">
       {/* Editorial Header */}
@@ -59,25 +70,25 @@ export const CommerceSecurityPage: React.FC<CommerceSecurityPageProps> = ({
         />
         <VitrineMetric
           catalogNo="SEC #02"
-          title="Fraud Interceptions"
+          title="Security Intercepts"
           value={fraudCount.toLocaleString()}
-          annotation={`${((fraudCount / (commReceipts.length || 1)) * 100).toFixed(1)}% alert rate`}
+          annotation="Distance disparity flags"
           icon={ShieldAlert}
           accent
         />
         <VitrineMetric
           catalogNo="SEC #03"
-          title="Geographic Breadth"
-          value={citySet.size.toLocaleString()}
-          annotation="311 cities across 28 states"
-          icon={Building}
+          title="National Footprint"
+          value={`${citySet.size} Cities`}
+          annotation="Pan-India point-of-sale radius"
+          icon={MapPin}
         />
         <VitrineMetric
           catalogNo="SEC #04"
-          title="Data Sanitization"
-          value="PCI Compliant"
-          annotation="100% tokenized & PII redacted"
-          icon={ShieldCheck}
+          title="Card Tokenization"
+          value="100% Masked"
+          annotation="PCI-DSS standard sanitized"
+          icon={Lock}
         />
       </div>
 
@@ -85,7 +96,7 @@ export const CommerceSecurityPage: React.FC<CommerceSecurityPageProps> = ({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="border border-white/[0.08] bg-[#0F1117] p-6 sm:p-8 flex flex-col justify-between">
           <span className="text-[9px] font-mono tracking-widest text-museum-muted uppercase">
-            FORENSIC RATIO // RISK VS LEGITIMACY
+            CHART 5.1 // RISK TELEMETRY COMPOSITION
           </span>
           <h3 className="text-sm font-mono font-bold text-white tracking-wide mt-1 border-b border-white/[0.06] pb-3">
             SECURITY FLAG DISTRIBUTION
@@ -170,13 +181,19 @@ export const CommerceSecurityPage: React.FC<CommerceSecurityPageProps> = ({
         "Between 2015 and 2018, financial risk was bounded by physical cash in hand. By 2022–2024, digital card commerce spanned 311 Indian cities, with 52.4% of high-velocity charges encountering automated fraud defense checks."
       </CuratorNote>
 
-      {/* Feed */}
+      {/* Commercial Telemetry List with Pagination */}
       <div className="space-y-4">
-        <h3 className="text-base font-mono font-bold text-white tracking-wide border-b border-white/[0.08] pb-2">
-          COMMERCIAL TELEMETRY RECORDS
-        </h3>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-white/[0.08] pb-3 gap-2">
+          <h3 className="text-base font-mono font-bold text-white tracking-wide">
+            COMMERCIAL TELEMETRY RECORDS
+          </h3>
+          <span className="text-xs font-mono text-museum-muted">
+            Showing {((validPage - 1) * itemsPerPage) + 1}–{Math.min(validPage * itemsPerPage, totalItems)} of {totalItems.toLocaleString()} transactions
+          </span>
+        </div>
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {commReceipts.slice(0, 18).map(receipt => (
+          {paginatedReceipts.map(receipt => (
             <MuseumReceiptCard
               key={receipt.id}
               receipt={receipt}
@@ -184,6 +201,31 @@ export const CommerceSecurityPage: React.FC<CommerceSecurityPageProps> = ({
             />
           ))}
         </div>
+
+        {/* Pagination Bar */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between border-t border-white/[0.08] pt-4 text-xs font-mono text-museum-muted">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={validPage === 1}
+              className="border border-white/10 bg-[#0F1117] px-3 py-1.5 hover:border-archival-amber/60 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+            >
+              ← Previous
+            </button>
+
+            <span className="text-white">
+              Page <span className="text-archival-amber font-bold">{validPage}</span> of {totalPages.toLocaleString()}
+            </span>
+
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={validPage === totalPages}
+              className="border border-white/10 bg-[#0F1117] px-3 py-1.5 hover:border-archival-amber/60 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+            >
+              Next →
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

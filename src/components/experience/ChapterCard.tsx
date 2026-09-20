@@ -18,67 +18,55 @@ interface ChapterCardProps {
   onOpenDetails?: (chapter: LifeChapter) => void;
 }
 
-export const ChapterCard: React.FC<ChapterCardProps> = ({
+const ChapterCardComponent: React.FC<ChapterCardProps> = ({
   chapter,
-  isSelected = false,
   onSelect,
+  isSelected = false,
   onOpenDetails,
 }) => {
   return (
     <div
       onClick={() => onSelect(chapter)}
-      className={`group relative flex flex-col justify-between border rounded-lg p-5 cursor-pointer transition-all duration-300 overflow-hidden ${
+      className={`group relative flex flex-col justify-between p-5 rounded-lg border transition-all duration-300 cursor-pointer overflow-hidden ${
         isSelected
-          ? 'border-archival-amber bg-[#141722] shadow-glow-amber-subtle translate-y-[-2px]'
-          : 'border-white/[0.08] bg-[#0F1117] hover:border-white/20 hover:bg-[#12151E]'
+          ? 'bg-archival-amber/[0.08] border-archival-amber shadow-[0_0_25px_rgba(212,163,115,0.15)]'
+          : 'bg-[#0F1117] border-white/[0.08] hover:border-white/20 hover:bg-[#151821]'
       }`}
     >
-      {/* Top Accent Strip */}
+      {/* Top Chapter Number Accent Strip */}
       <div
         className={`absolute top-0 left-0 right-0 h-[2px] transition-all duration-300 ${
           isSelected ? 'bg-archival-amber' : 'bg-transparent group-hover:bg-white/20'
         }`}
       />
 
-      <div className="space-y-3">
-        {/* Header Metadata */}
-        <div className="flex items-center justify-between text-[10px] font-mono">
+      {/* Header Metadata */}
+      <div>
+        <div className="flex items-center justify-between gap-2 text-[10px] font-mono mb-2.5">
           <div className="flex items-center space-x-1.5 px-2 py-0.5 rounded bg-white/[0.04] border border-white/[0.06]">
             <BookOpen className="h-3 w-3 text-archival-amber" />
-            <span className="text-white/80 font-bold uppercase tracking-wider">
+            <span className="text-white/80 uppercase tracking-wider font-semibold">
               CHAPTER 0{chapter.number}
             </span>
           </div>
-          <span className="text-archival-amber font-mono font-medium">
+          <span className="text-archival-amber font-mono font-medium text-[10px]">
             {chapter.dateRange.formatted}
           </span>
         </div>
 
-        {/* Title & Subtitle */}
-        <div>
-          <h3 className="text-base font-serif font-bold text-white group-hover:text-archival-amber transition-colors line-clamp-2 leading-snug">
-            {chapter.title}
-          </h3>
-          <p className="text-xs font-serif italic text-museum-muted mt-1.5 line-clamp-2 leading-relaxed">
-            {chapter.subtitle}
-          </p>
-        </div>
+        {/* Title */}
+        <h3 className="text-base font-serif font-bold text-white group-hover:text-archival-amber transition-colors line-clamp-2 leading-snug">
+          {chapter.title}
+        </h3>
 
-        {/* Dominant Categories Pills */}
-        <div className="flex flex-wrap gap-1.5 pt-1">
-          {chapter.dominantCategories.slice(0, 3).map((cat, idx) => (
-            <span
-              key={idx}
-              className="px-2 py-0.5 text-[9px] font-mono bg-white/[0.04] border border-white/[0.06] text-white/70 rounded truncate max-w-[140px]"
-            >
-              {cat}
-            </span>
-          ))}
-        </div>
+        {/* Subtitle */}
+        <p className="text-xs font-serif italic text-museum-muted mt-1.5 line-clamp-2 leading-relaxed">
+          {chapter.subtitle}
+        </p>
 
-        {/* Key Metrics Highlight Preview */}
-        {chapter.supportingMetrics[0] && (
-          <div className="p-2.5 bg-black/40 border border-white/[0.06] rounded font-mono">
+        {/* Primary Metric Badge */}
+        {chapter.supportingMetrics && chapter.supportingMetrics.length > 0 && (
+          <div className="mt-3.5 p-2.5 bg-black/40 border border-white/[0.06] rounded font-mono">
             <span className="text-[9px] text-museum-muted uppercase tracking-widest block mb-0.5">
               {chapter.supportingMetrics[0].label}
             </span>
@@ -87,6 +75,18 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             </span>
           </div>
         )}
+
+        {/* Dominant Categories Tags */}
+        <div className="mt-3 flex flex-wrap gap-1">
+          {chapter.dominantCategories.slice(0, 3).map((cat) => (
+            <span
+              key={cat}
+              className="px-2 py-0.5 text-[9px] font-mono bg-white/[0.03] border border-white/[0.05] rounded text-museum-muted"
+            >
+              {cat}
+            </span>
+          ))}
+        </div>
       </div>
 
       {/* Footer Info & Details Action */}
@@ -114,3 +114,5 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
     </div>
   );
 };
+
+export const ChapterCard = React.memo(ChapterCardComponent);

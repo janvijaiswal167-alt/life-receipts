@@ -22,16 +22,30 @@ import type { LifeDiscovery, DiscoveryType } from '../types/discoveries.ts';
 
 export type * from '../types/discoveries.ts';
 
+let lastDiscoveriesInput: LifeReceipt[] | null = null;
+let lastDiscoveriesResult: LifeDiscovery[] | null = null;
+
 /**
- * Discovers high-value, defensible anomalies and hidden patterns across normalized receipts
+ * Discovers high-value, defensible anomalies and hidden patterns across normalized receipts (memoized)
  */
 export function discoverHighValueFindings(receipts: LifeReceipt[]): LifeDiscovery[] {
-  const discoveries: LifeDiscovery[] = [];
-  if (!receipts || receipts.length === 0) return discoveries;
+  if (!receipts || receipts.length === 0) return [];
+  if (lastDiscoveriesInput === receipts && lastDiscoveriesResult) {
+    return lastDiscoveriesResult;
+  }
 
-  const spotify = receipts.filter(r => r.source === 'spotify');
-  const household = receipts.filter(r => r.source === 'household');
-  const commerce = receipts.filter(r => r.source === 'commerce');
+  const discoveries: LifeDiscovery[] = [];
+
+  const spotify: LifeReceipt[] = [];
+  const household: LifeReceipt[] = [];
+  const commerce: LifeReceipt[] = [];
+
+  for (let i = 0; i < receipts.length; i++) {
+    const r = receipts[i];
+    if (r.source === 'spotify') spotify.push(r);
+    else if (r.source === 'household') household.push(r);
+    else if (r.source === 'commerce') commerce.push(r);
+  }
 
   // ==========================================================================
   // 1. THE ₹2.00 MICRO-DEBIT (EXTREME LEDGER FIDELITY)
@@ -204,5 +218,8 @@ export function discoverHighValueFindings(receipts: LifeReceipt[]): LifeDiscover
   }
 
   // Sort by surprise score descending
-  return discoveries.sort((a, b) => (b.surpriseScore || 0) - (a.surpriseScore || 0));
+  const sorted = discoveries.sort((a, b) => (b.surpriseScore || 0) - (a.surpriseScore || 0));
+  lastDiscoveriesInput = receipts;
+  lastDiscoveriesResult = sorted;
+  return sorted;
 }

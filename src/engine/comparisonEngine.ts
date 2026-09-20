@@ -26,7 +26,7 @@ import type {
 export type * from '../types/comparisons.ts';
 
 /**
- * Creates a PeriodSummary from a slice of receipts
+ * Creates a PeriodSummary from a slice of receipts in a single O(N) pass
  */
 export function createPeriodSummary(
   id: string,
@@ -34,28 +34,32 @@ export function createPeriodSummary(
   timeSpan: string,
   receipts: LifeReceipt[]
 ): PeriodSummary {
-  const totalSpend = receipts.reduce((sum, r) => sum + (r.amount || 0), 0);
-  const spotMs = receipts
-    .filter(r => r.source === 'spotify')
-    .reduce((sum, r) => sum + (r.metadata?.durationMs || 180000), 0);
-  const audioHours = Math.round((spotMs / (1000 * 3600)) * 10) / 10;
-
-  // Top categories
+  let totalSpend = 0;
+  let spotMs = 0;
   const catCounts: { [cat: string]: number } = {};
-  receipts.forEach(r => {
+  const artistCounts: { [artist: string]: number } = {};
+
+  const len = receipts.length;
+  for (let i = 0; i < len; i++) {
+    const r = receipts[i];
+    if (r.amount) totalSpend += r.amount;
+    if (r.source === 'spotify') {
+      spotMs += (r.metadata?.durationMs || 180000);
+      if (r.subtitle) {
+        artistCounts[r.subtitle] = (artistCounts[r.subtitle] || 0) + 1;
+      }
+    }
     const c = r.category || 'General';
     catCounts[c] = (catCounts[c] || 0) + 1;
-  });
+  }
+
+  const audioHours = Math.round((spotMs / (1000 * 3600)) * 10) / 10;
+
   const topCategories = Object.entries(catCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
     .map(c => c[0]);
 
-  // Top artists
-  const artistCounts: { [artist: string]: number } = {};
-  receipts.filter(r => r.source === 'spotify').forEach(r => {
-    if (r.subtitle) artistCounts[r.subtitle] = (artistCounts[r.subtitle] || 0) + 1;
-  });
   const topEntities = Object.entries(artistCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
@@ -67,7 +71,7 @@ export function createPeriodSummary(
     timeSpan,
     summary: `${receipts.length.toLocaleString()} artifacts cataloged across ${timeSpan}.`,
     receiptCount: receipts.length,
-    totalSpend,
+    totalSpend: Math.round(totalSpend),
     audioHours,
     topCategories,
     topEntities,
@@ -371,35 +375,48 @@ export function comparePeriods(
     });
   }
 
-  // Category-by-Category Deltas
-  const allCats = Array.from(new Set([
-    ...receiptsA.map(r => r.category || 'General & Other'),
-    ...receiptsB.map(r => r.category || 'General & Other'),
-  ]));
+  // Category-by-Category Deltas (computed in single O(NA + NB) pass)
+  const catStatsA: Record<string, { count: number; spend: number }> = {};
+  for (let i = 0; i < receiptsA.length; i++) {
+    const c = receiptsA[i].category || 'General & Other';
+    if (!catStatsA[c]) catStatsA[c] = { count: 0, spend: 0 };
+    catStatsA[c].count++;
+    if (receiptsA[i].amount) catStatsA[c].spend += receiptsA[i].amount!;
+  }
+
+  const catStatsB: Record<string, { count: number; spend: number }> = {};
+  for (let i = 0; i < receiptsB.length; i++) {
+    const c = receiptsB[i].category || 'General & Other';
+    if (!catStatsB[c]) catStatsB[c] = { count: 0, spend: 0 };
+    catStatsB[c].count++;
+    if (receiptsB[i].amount) catStatsB[c].spend += receiptsB[i].amount!;
+  }
+
+  const allCats = Array.from(new Set([...Object.keys(catStatsA), ...Object.keys(catStatsB)]));
 
   const categoryDeltas = allCats.map(cat => {
-    const recsA = receiptsA.filter(r => r.category === cat);
-    const recsB = receiptsB.filter(r => r.category === cat);
-    const sumA = recsA.reduce((s, r) => s + (r.amount || 0), 0);
-    const sumB = recsB.reduce((s, r) => s + (r.amount || 0), 0);
+    const countA = catStatsA[cat]?.count || 0;
+    const countB = catStatsB[cat]?.count || 0;
+    const sumA = catStatsA[cat]?.spend || 0;
+    const sumB = catStatsB[cat]?.spend || 0;
 
     let dir: ChangeDirection = 'stable';
-    if (recsA.length === 0 && recsB.length > 0) dir = 'emerged';
-    else if (recsB.length > recsA.length) dir = 'increased';
-    else if (recsB.length < recsA.length) dir = 'decreased';
+    if (countA === 0 && countB > 0) dir = 'emerged';
+    else if (countB > countA) dir = 'increased';
+    else if (countB < countA) dir = 'decreased';
 
     return {
       category: cat,
-      beforeCount: recsA.length,
-      afterCount: recsB.length,
+      beforeCount: countA,
+      afterCount: countB,
       beforeSpend: sumA,
       afterSpend: sumB,
       changeText: dir === 'emerged'
         ? 'Category emerged'
         : dir === 'increased'
-        ? `Frequency increased (${recsA.length} → ${recsB.length})`
+        ? `Frequency increased (${countA} → ${countB})`
         : dir === 'decreased'
-        ? `Frequency decreased (${recsA.length} → ${recsB.length})`
+        ? `Frequency decreased (${countA} → ${countB})`
         : 'Frequency unchanged',
       direction: dir,
     };
@@ -415,16 +432,30 @@ export function comparePeriods(
   };
 }
 
+let lastEraInput: LifeReceipt[] | null = null;
+let lastEraResult: PeriodComparison[] | null = null;
+
 /**
- * Discovers standard era-to-era comparisons across the 4 major eras
+ * Discovers standard era-to-era comparisons across the 4 major eras (memoized)
  */
 export function generateEraComparisons(receipts: LifeReceipt[]): PeriodComparison[] {
   if (!receipts || receipts.length === 0) return [];
+  if (lastEraInput === receipts && lastEraResult) {
+    return lastEraResult;
+  }
 
-  const era1 = receipts.filter(r => r.year >= 2013 && r.year <= 2014);
-  const era2 = receipts.filter(r => r.year >= 2015 && r.year <= 2018);
-  const era3 = receipts.filter(r => r.year >= 2019 && r.year <= 2021);
-  const era4 = receipts.filter(r => r.year >= 2022 && r.year <= 2024);
+  const era1: LifeReceipt[] = [];
+  const era2: LifeReceipt[] = [];
+  const era3: LifeReceipt[] = [];
+  const era4: LifeReceipt[] = [];
+
+  for (let i = 0; i < receipts.length; i++) {
+    const r = receipts[i];
+    if (r.year >= 2013 && r.year <= 2014) era1.push(r);
+    else if (r.year >= 2015 && r.year <= 2018) era2.push(r);
+    else if (r.year >= 2019 && r.year <= 2021) era3.push(r);
+    else if (r.year >= 2022 && r.year <= 2024) era4.push(r);
+  }
 
   const comparisons: PeriodComparison[] = [];
 
@@ -467,7 +498,7 @@ export function generateEraComparisons(receipts: LifeReceipt[]): PeriodCompariso
         'era-2',
         'Era II: Daily Living Grind',
         '2015 – 2018',
-        era3,
+        era2,
         'era-3',
         'Era III: Digital Immersion',
         '2019 – 2021',
@@ -492,5 +523,7 @@ export function generateEraComparisons(receipts: LifeReceipt[]): PeriodCompariso
     );
   }
 
+  lastEraInput = receipts;
+  lastEraResult = comparisons;
   return comparisons;
 }

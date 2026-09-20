@@ -72,19 +72,19 @@ const getPatternTypeLabel = (type: PatternType) => {
   }
 };
 
-export const PatternCard: React.FC<PatternCardProps> = ({
+const PatternCardComponent: React.FC<PatternCardProps> = ({
   pattern,
-  isSelected = false,
   onSelect,
+  isSelected = false,
   onViewEvidence,
 }) => {
   return (
     <div
       onClick={() => onSelect(pattern)}
-      className={`group relative flex flex-col justify-between border transition-all duration-300 cursor-pointer overflow-hidden p-5 ${
+      className={`group relative flex flex-col justify-between p-5 rounded-lg border transition-all duration-300 cursor-pointer ${
         isSelected
-          ? 'border-archival-amber bg-[#141722] shadow-glow-amber-subtle translate-y-[-2px]'
-          : 'border-white/[0.08] bg-[#0F1117] hover:border-white/20 hover:bg-[#12151E]'
+          ? 'bg-archival-amber/[0.08] border-archival-amber shadow-[0_0_25px_rgba(212,163,115,0.15)]'
+          : 'bg-[#0F1117] border-white/[0.08] hover:border-white/20 hover:bg-[#151821]'
       }`}
     >
       {/* Top Accent Strip */}
@@ -161,3 +161,5 @@ export const PatternCard: React.FC<PatternCardProps> = ({
     </div>
   );
 };
+
+export const PatternCard = React.memo(PatternCardComponent);

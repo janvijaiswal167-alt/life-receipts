@@ -766,13 +766,22 @@ export function detectRepeatedSequencePatterns(receipts: LifeReceipt[]): LifePat
   const spotStreams = receipts.filter(r => r.source === 'spotify');
 
   if (transitItems.length > 0 && spotStreams.length > 0) {
+    const spotByDate = new Map<string, LifeReceipt>();
+    for (let i = 0; i < spotStreams.length; i++) {
+      const s = spotStreams[i];
+      if (!spotByDate.has(s.dateStr)) {
+        spotByDate.set(s.dateStr, s);
+      }
+    }
+
     const dateSyncedPairs: { transit: LifeReceipt; stream: LifeReceipt }[] = [];
-    transitItems.forEach(tr => {
-      const match = spotStreams.find(s => s.dateStr === tr.dateStr);
+    for (let i = 0; i < transitItems.length; i++) {
+      const tr = transitItems[i];
+      const match = spotByDate.get(tr.dateStr);
       if (match) {
         dateSyncedPairs.push({ transit: tr, stream: match });
       }
-    });
+    }
 
     if (dateSyncedPairs.length >= 2) {
       patterns.push({
@@ -807,14 +816,20 @@ export function detectRepeatedSequencePatterns(receipts: LifeReceipt[]): LifePat
 }
 
 // ============================================================================
-// MASTER PATTERN DISCOVERY FUNCTION
+// MASTER PATTERN DISCOVERY FUNCTION (MEMOIZED)
 // ============================================================================
+
+let lastPatternsInput: LifeReceipt[] | null = null;
+let lastPatternsResult: LifePattern[] | null = null;
 
 /**
  * Discovers explainable, empirical patterns across all 9 pattern types from normalized receipts.
  */
 export function discoverLifePatterns(receipts: LifeReceipt[]): LifePattern[] {
   if (!receipts || receipts.length === 0) return [];
+  if (lastPatternsInput === receipts && lastPatternsResult) {
+    return lastPatternsResult;
+  }
 
   const allPatterns: LifePattern[] = [
     ...detectPeakActivityPatterns(receipts),
@@ -829,16 +844,26 @@ export function discoverLifePatterns(receipts: LifeReceipt[]): LifePattern[] {
   ];
 
   // Sort by confidence score descending
-  return allPatterns.sort((a, b) => b.confidenceScore - a.confidenceScore);
+  const sorted = allPatterns.sort((a, b) => b.confidenceScore - a.confidenceScore);
+  lastPatternsInput = receipts;
+  lastPatternsResult = sorted;
+  return sorted;
 }
 
 // ============================================================================
-// CROSS CONNECTIONS, MOMENTS, ANOMALIES, AND ERAS
+// CROSS CONNECTIONS, MOMENTS, ANOMALIES, AND ERAS (MEMOIZED)
 // ============================================================================
 
+let lastLegacyMomentsInput: LifeReceipt[] | null = null;
+let lastLegacyMomentsResult: LifeMoment[] | null = null;
+
 export function extractLifeMoments(receipts: LifeReceipt[]): LifeMoment[] {
+  if (!receipts || receipts.length === 0) return [];
+  if (lastLegacyMomentsInput === receipts && lastLegacyMomentsResult) {
+    return lastLegacyMomentsResult;
+  }
+
   const moments: LifeMoment[] = [];
-  if (!receipts || receipts.length === 0) return moments;
 
   // 1. First Spotify Stream
   const spotStreams = receipts.filter(r => r.source === 'spotify').sort((a, b) => a.timestamp - b.timestamp);
@@ -925,22 +950,52 @@ export function extractLifeMoments(receipts: LifeReceipt[]): LifeMoment[] {
     });
   }
 
+  lastLegacyMomentsInput = receipts;
+  lastLegacyMomentsResult = moments;
   return moments;
 }
 
-export function discoverCrossConnections(receipts: LifeReceipt[]): CrossConnection[] {
-  const connections: CrossConnection[] = [];
-  if (!receipts || receipts.length === 0) return connections;
+let lastConnectionsInput: LifeReceipt[] | null = null;
+let lastConnectionsResult: CrossConnection[] | null = null;
 
-  const spotify = receipts.filter(r => r.source === 'spotify');
-  const household = receipts.filter(r => r.source === 'household');
-  const commerce = receipts.filter(r => r.source === 'commerce');
+export function discoverCrossConnections(receipts: LifeReceipt[]): CrossConnection[] {
+  if (!receipts || receipts.length === 0) return [];
+  if (lastConnectionsInput === receipts && lastConnectionsResult) {
+    return lastConnectionsResult;
+  }
+
+  const connections: CrossConnection[] = [];
+
+  const spotify: LifeReceipt[] = [];
+  const household: LifeReceipt[] = [];
+  const commerce: LifeReceipt[] = [];
+
+  const spotifyByDate = new Map<string, LifeReceipt>();
+  const spotifyByYearMonth = new Map<string, LifeReceipt>();
+
+  for (let i = 0; i < receipts.length; i++) {
+    const r = receipts[i];
+    if (r.source === 'spotify') {
+      spotify.push(r);
+      if (!spotifyByDate.has(r.dateStr)) {
+        spotifyByDate.set(r.dateStr, r);
+      }
+      const ym = r.dateStr.slice(0, 7);
+      if (!spotifyByYearMonth.has(ym)) {
+        spotifyByYearMonth.set(ym, r);
+      }
+    } else if (r.source === 'household') {
+      household.push(r);
+    } else if (r.source === 'commerce') {
+      commerce.push(r);
+    }
+  }
 
   // Connection 1: Commute auto/train paired with audio stream on the exact same date
   const transitHh = household.filter(r => r.category === 'Transportation & Commute');
   if (transitHh.length > 0) {
     for (const tr of transitHh) {
-      const matchSpot = spotify.find(s => s.dateStr === tr.dateStr);
+      const matchSpot = spotifyByDate.get(tr.dateStr);
       if (matchSpot) {
         connections.push({
           id: `conn-commute-${tr.id}`,
@@ -962,7 +1017,8 @@ export function discoverCrossConnections(receipts: LifeReceipt[]): CrossConnecti
   const subHh = household.filter(r => (r.title + ' ' + (r.subtitle || '')).toLowerCase().includes('audible') || (r.title + ' ' + (r.subtitle || '')).toLowerCase().includes('netflix'));
   if (subHh.length > 0 && spotify.length > 0) {
     const sub = subHh[0];
-    const spotInMonth = spotify.find(s => s.year === sub.year && s.month === sub.month) || spotify[0];
+    const ym = sub.dateStr.slice(0, 7);
+    const spotInMonth = spotifyByYearMonth.get(ym) || spotify[0];
     connections.push({
       id: `conn-sub-${sub.id}`,
       title: 'The Digital Subscription Pipeline',
@@ -998,7 +1054,7 @@ export function discoverCrossConnections(receipts: LifeReceipt[]): CrossConnecti
   const fraudComm = commerce.filter(r => r.metadata?.isFraud === true);
   if (fraudComm.length > 0 && spotify.length > 0) {
     const fr = fraudComm[0];
-    const spot = spotify.find(s => s.dateStr === fr.dateStr) || spotify[spotify.length - 1];
+    const spot = spotifyByDate.get(fr.dateStr) || spotify[spotify.length - 1];
     connections.push({
       id: `conn-fraud-${fr.id}`,
       title: 'Cyber Anomaly vs Acoustic Sanctuary',
@@ -1012,6 +1068,8 @@ export function discoverCrossConnections(receipts: LifeReceipt[]): CrossConnecti
     });
   }
 
+  lastConnectionsInput = receipts;
+  lastConnectionsResult = connections;
   return connections;
 }
 
